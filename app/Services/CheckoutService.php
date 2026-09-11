@@ -3,12 +3,14 @@
 namespace App\Services;
 
 use App\Enums\OrderStatus;
+use App\Mail\OrderConfirmationMail;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Variant;
 use App\Services\Payments\PaymentIntent;
 use App\Services\Payments\PaymentManager;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class CheckoutService
@@ -20,7 +22,7 @@ class CheckoutService
 
     /**
      * Создаёт заказ из корзины: снимки цен и названий, списание стока
-     * под блокировкой строк, инициация оплаты.
+     * под блокировкой строк, инициация оплаты и отправка письма с инвойсом.
      *
      * @param  array{email:string, phone?:string|null, shipping_address:array, notes?:string|null, discreet_packaging?:bool}  $data
      */
@@ -32,6 +34,7 @@ class CheckoutService
             throw ValidationException::withMessages(['cart' => 'Your cart is empty.']);
         }
 
+        /** @var Order $order */
         $order = DB::transaction(function () use ($cart, $data) {
             $subtotal = 0;
             $lines = [];
@@ -92,6 +95,13 @@ class CheckoutService
         });
 
         $this->carts->clear($cart);
+
+        // Отправка письма с вложенным темным PDF-инвойсом клиенту
+        try {
+            Mail::to($order->email)->queue(new OrderConfirmationMail($order));
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return $this->payments->driver()->initiate($order);
     }

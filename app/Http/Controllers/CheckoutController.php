@@ -7,6 +7,7 @@ use App\Http\Resources\CartResource;
 use App\Models\Order;
 use App\Services\CartService;
 use App\Services\CheckoutService;
+use App\Services\InvoiceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -88,6 +89,14 @@ class CheckoutController extends Controller
                 ]),
             ],
         ]);
+    }
+
+    /** Скачивание темного PDF-инвойса */
+    public function invoice(Request $request, Order $order, InvoiceService $invoices): \Illuminate\Http\Response
+    {
+        $this->authorizeView($request, $order);
+
+        return $invoices->download($order);
     }
 
     /** Владелец, админ — или гость с номером заказа в текущей сессии. */

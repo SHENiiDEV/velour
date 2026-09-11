@@ -23,13 +23,26 @@ export default function CheckoutSuccess({ order }: { order: OrderSummary }) {
                     </h1>
 
                     <p className="mt-6 font-display text-2xl font-light leading-snug text-ivory/85 md:text-3xl">
-                        From here on, only stillness: a receipt dispatched to <span className="text-ivory font-normal">{order.email}</span>, a sealed unbranded parcel, and{' '}
-                        <span className="text-gold-2 font-normal">{order.statementDescriptor}</span> on your financial ledger.
+                        From here on, only stillness: an email confirmation with an attached dark PDF invoice has been sent to <span className="text-ivory font-normal">{order.email}</span>, a sealed unbranded parcel is being prepared, and{' '}
+                        <span className="text-gold-2 font-normal">{order.statementDescriptor}</span> will be on your financial ledger.
                     </p>
 
                     {/* Order Details Card */}
                     <div className="mt-12 rounded-sm border border-ivory/10 bg-surface/40 p-8 backdrop-blur-md">
-                        <h3 className="font-display text-xl font-light text-ivory">Passage Manifest</h3>
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-ivory/10 pb-4">
+                            <h3 className="font-display text-xl font-light text-ivory">Passage Manifest</h3>
+                            <a
+                                href={`/order/${order.number}/invoice`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-2 rounded border border-gold/40 bg-gold/10 px-3.5 py-1.5 font-sans text-xs font-medium text-gold-2 transition-colors hover:bg-gold hover:text-void"
+                            >
+                                <svg className="h-4 w-4 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span>Download PDF Invoice</span>
+                            </a>
+                        </div>
 
                         <dl className="mt-6 divide-y divide-ivory/10 font-sans text-sm font-light">
                             {order.items.map((it, i) => (

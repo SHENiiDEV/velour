@@ -2,10 +2,12 @@
 
 use App\Enums\OrderStatus;
 use App\Http\Middleware\EnsureAgeVerified;
+use App\Mail\OrderConfirmationMail;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Variant;
+use Illuminate\Support\Facades\Mail;
 
 beforeEach(function () {
     $this->withCookie(EnsureAgeVerified::COOKIE, EnsureAgeVerified::VALUE);
@@ -125,4 +127,26 @@ it('hides the success page from an unrelated visitor', function () {
     $this->flushSession();
 
     $this->get(route('checkout.success', $order))->assertNotFound();
+});
+
+it('queues an order confirmation email upon checkout', function () {
+    Mail::fake();
+
+    placeOrder($this);
+
+    $order = Order::first();
+
+    Mail::assertQueued(OrderConfirmationMail::class, function ($mail) use ($order) {
+        return $mail->hasTo('guest@example.com') && $mail->order->is($order);
+    });
+});
+
+it('allows the customer to download their dark PDF invoice', function () {
+    placeOrder($this);
+    $order = Order::first();
+
+    $response = $this->get(route('order.invoice', $order));
+
+    $response->assertOk();
+    $response->assertHeader('content-type', 'application/pdf');
 });

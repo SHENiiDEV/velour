@@ -30,10 +30,11 @@ Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
 Route::patch('/cart/{item}', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/{item}', [CartController::class, 'destroy'])->name('cart.destroy');
 
-// Оформление
+// Оформление & Инвойсы
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::get('/checkout/{order:number}/success', [CheckoutController::class, 'success'])->name('checkout.success');
+Route::get('/order/{order:number}/invoice', [CheckoutController::class, 'invoice'])->name('order.invoice');
 
 // Редакция
 Route::get('/journal', fn () => Inertia::render('journal'))->name('journal');
