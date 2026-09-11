@@ -9,7 +9,6 @@ use App\Models\Product;
 use App\Models\ProductAttribute;
 use App\Models\Variant;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class ClearCatalogCommand extends Command
@@ -29,31 +28,28 @@ class ClearCatalogCommand extends Command
 
         $this->warn('Clearing catalog...');
 
-        DB::transaction(function () {
-            // Отключаем внешние ключи для чистого усечения или каскадного удаления
-            Schema::disableForeignKeyConstraints();
+        Schema::disableForeignKeyConstraints();
 
-            // 1. Очищаем позиции в корзинах (ссылающиеся на товары)
-            CartItem::truncate();
+        // 1. Очищаем позиции в корзинах (ссылающиеся на товары)
+        CartItem::query()->delete();
 
-            // 2. Очищаем медиафайлы товаров и вариантов
-            Media::whereIn('mediable_type', [Product::class, Variant::class, Category::class])->delete();
+        // 2. Очищаем медиафайлы товаров, вариантов и категорий
+        Media::whereIn('mediable_type', [Product::class, Variant::class, Category::class])->delete();
 
-            // 3. Очищаем плоские атрибуты для фильтрации
-            ProductAttribute::truncate();
+        // 3. Очищаем плоские атрибуты для фильтрации
+        ProductAttribute::query()->delete();
 
-            // 4. Очищаем варианты и товары (включая soft-deleted)
-            Variant::truncate();
-            Product::withTrashed()->forceDelete();
+        // 4. Очищаем варианты и товары (включая soft-deleted)
+        Variant::query()->delete();
+        Product::withTrashed()->forceDelete();
 
-            // 5. Опционально очищаем категории
-            if (! $this->option('keep-categories')) {
-                Category::truncate();
-                $this->line('  ✓ Categories wiped');
-            }
+        // 5. Опционально очищаем категории
+        if (! $this->option('keep-categories')) {
+            Category::query()->delete();
+            $this->line('  ✓ Categories wiped');
+        }
 
-            Schema::enableForeignKeyConstraints();
-        });
+        Schema::enableForeignKeyConstraints();
 
         $this->info('✓ Catalog successfully cleared! You can now run `php artisan catalog:import`.');
 
