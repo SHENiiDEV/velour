@@ -13,8 +13,10 @@ const nav = [
 
 export default function Header() {
     const { discreet } = usePrivacy();
-    const { cartCount } = useShared();
-    const { url } = usePage();
+    const shared = useShared();
+    const cartCount = typeof shared.cartCount === 'number' ? shared.cartCount : 0;
+    const page = usePage();
+    const url = page?.url || '';
     const [open, setOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 

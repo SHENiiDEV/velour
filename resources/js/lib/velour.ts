@@ -17,12 +17,24 @@ export const palette = {
     mute: '#9E8E88',
 } as const;
 
-export function useShared(): SharedProps {
-    return usePage<SharedProps>().props;
+export function useShared(): Partial<SharedProps> {
+    try {
+        const page = usePage<SharedProps>();
+        return page?.props || {};
+    } catch {
+        return {};
+    }
 }
 
 export function usePrivacy() {
-    return useShared().privacy;
+    const shared = useShared();
+    return (
+        shared.privacy || {
+            discreet: false,
+            ageVerified: false,
+            exitUrl: 'https://www.google.com',
+        }
+    );
 }
 
 export function prefersReducedMotion(): boolean {
@@ -30,11 +42,12 @@ export function prefersReducedMotion(): boolean {
 }
 
 /** Быстрый выход: заменяем текущую запись истории, чтобы «назад» не вёл на VELOUR. */
-export function quickExit(url: string) {
+export function quickExit(url?: string) {
+    const target = url || 'https://www.google.com';
     try {
         window.history.replaceState(null, '', '/');
     } catch {
         /* noop */
     }
-    window.location.replace(url);
+    window.location.replace(target);
 }
