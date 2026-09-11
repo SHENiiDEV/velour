@@ -39,10 +39,14 @@ Route::get('/order/{order:number}/invoice', [CheckoutController::class, 'invoice
 // Редакция
 Route::get('/journal', fn () => Inertia::render('journal'))->name('journal');
 
-// Доступны без age-gate: юридические страницы и «Забота» (образование, не витрина)
+// Доступны без age-gate: юридические страницы, «Забота» и Страницы Ошибок
 Route::get('/care', fn () => Inertia::render('care'))->name('care');
 Route::get('/privacy', fn () => Inertia::render('legal/privacy'))->name('legal.privacy');
 Route::get('/terms', fn () => Inertia::render('legal/terms'))->name('legal.terms');
+
+// Превью страниц ошибок
+Route::get('/error/404', fn () => Inertia::render('error', ['status' => 404]))->name('error.404');
+Route::get('/error/503', fn () => Inertia::render('error', ['status' => 503]))->name('error.503');
 
 // Dashboard
 Route::get('/dashboard', fn () => Inertia::render('dashboard'))->middleware(['auth', 'verified'])->name('dashboard');

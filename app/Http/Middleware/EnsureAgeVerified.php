@@ -27,6 +27,8 @@ class EnsureAgeVerified
         'legal.privacy',
         'legal.terms',
         'care',
+        'error.404',
+        'error.503',
         'up',
     ];
 
@@ -67,12 +69,13 @@ class EnsureAgeVerified
                 str_starts_with($name, 'verification.') ||
                 str_starts_with($name, 'settings.') ||
                 str_starts_with($name, 'dashboard') ||
-                str_starts_with($name, 'logout')
+                str_starts_with($name, 'logout') ||
+                str_starts_with($name, 'error.')
             ) {
                 return true;
             }
         }
 
-        return $request->is('settings/*', 'dashboard', 'login', 'register', 'forgot-password', 'reset-password/*', 'verify-email/*');
+        return $request->is('settings/*', 'dashboard', 'login', 'register', 'forgot-password', 'reset-password/*', 'verify-email/*', 'error/*');
     }
 }
