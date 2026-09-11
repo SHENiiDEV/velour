@@ -1,0 +1,563 @@
+@import 'tailwindcss';
+
+@plugin 'tailwindcss-animate';
+
+@source '../views';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ------------------------------------------------------------------
+   VELOUR — единый источник правды по токенам.
+   Шейдер CinematicHero читает те же hex-значения (см. velour.ts).
+   ------------------------------------------------------------------ */
+@theme {
+    --color-void: #100a0c;
+    --color-surface: #1a1216;
+    --color-graphite: #231a1f;
+    --color-wine: #4e1224;
+    --color-rose: #c24d59;
+    --color-gold: #c6a15b;
+    --color-gold-2: #e6cb88;
+    --color-ivory: #ece3d6;
+    --color-mute: #9e8e88;
+
+    --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
+    --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+
+    /* Кинематографичная шкала заголовков */
+    --text-cine-xl: clamp(4.5rem, 14vw, 13.75rem);
+    --text-cine-xl--line-height: 0.9;
+    --text-cine-lg: clamp(3rem, 8vw, 7.5rem);
+    --text-cine-lg--line-height: 0.95;
+
+    --ease-cine: cubic-bezier(0.16, 1, 0.3, 1);
+    /*
+     * У кинематографичного easing почти всё движение уложено в первую треть:
+     * занавес успевал закрыть экран за 40% времени и казался рваным.
+     * Ему нужен ровный разгон и такое же торможение.
+     */
+    --ease-curtain: cubic-bezier(0.62, 0.04, 0.3, 1);
+    --animate-rise: rise 1.4s var(--ease-cine) both;
+    --animate-veil: veil 2.4s var(--ease-cine) both;
+
+    @keyframes rise {
+        from {
+            opacity: 0;
+            transform: translateY(0.35em) skewY(2deg);
+            filter: blur(6px);
+        }
+        to {
+            opacity: 1;
+            transform: none;
+            filter: blur(0);
+        }
+    }
+    @keyframes veil {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+}
+
+/* shadcn-совместимые переменные, замапленные на палитру VELOUR */
+:root,
+.dark {
+    --background: var(--color-void);
+    --foreground: var(--color-ivory);
+    --card: var(--color-surface);
+    --card-foreground: var(--color-ivory);
+    --popover: var(--color-graphite);
+    --popover-foreground: var(--color-ivory);
+    --primary: var(--color-gold);
+    --primary-foreground: var(--color-void);
+    --secondary: var(--color-wine);
+    --secondary-foreground: var(--color-ivory);
+    --muted: var(--color-graphite);
+    --muted-foreground: var(--color-mute);
+    --accent: var(--color-wine);
+    --accent-foreground: var(--color-ivory);
+    --destructive: var(--color-rose);
+    --border: color-mix(in oklab, var(--color-ivory) 12%, transparent);
+    --input: color-mix(in oklab, var(--color-ivory) 14%, transparent);
+    --ring: var(--color-gold);
+    --radius: 0.125rem;
+}
+
+/*
+| Мост к shadcn/ui: делаем из перечисленных выше переменных полноценные
+| токены Tailwind, иначе утилиты вроде border-border и bg-card не существуют
+| и сборка падает на @apply border-border.
+*/
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --radius-sm: calc(var(--radius) - 2px);
+    --radius-md: var(--radius);
+    --radius-lg: calc(var(--radius) + 2px);
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+    html {
+        color-scheme: dark;
+        scroll-behavior: smooth;
+    }
+    body {
+        @apply bg-void text-ivory font-sans font-light;
+        text-rendering: optimizeLegibility;
+    }
+    ::selection {
+        background: var(--color-wine);
+        color: var(--color-ivory);
+    }
+    h1,
+    h2,
+    h3 {
+        @apply font-display font-light;
+    }
+}
+
+@layer components {
+    /* Плёночное зерно — SVG-шум, без внешних файлов */
+    .film-grain {
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        opacity: 0.09;
+        mix-blend-mode: soft-light;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        animation: grain 0.6s steps(3) infinite;
+    }
+    @keyframes grain {
+        0% { transform: translate(0, 0); }
+        33% { transform: translate(-3%, 2%); }
+        66% { transform: translate(2%, -3%); }
+        100% { transform: translate(0, 0); }
+    }
+
+    .vignette {
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 70% 60% at 50% 45%, transparent 40%, rgb(16 10 12 / 0.75) 100%);
+    }
+
+    /* Скрытный режим: «шёлковая» вуаль над превью */
+    .discreet-veil {
+        filter: blur(18px) saturate(0.6);
+        transition: filter 0.5s var(--ease-cine);
+    }
+    .discreet-veil:hover,
+    .discreet-veil:focus-within {
+        filter: blur(0) saturate(1);
+    }
+
+    .hairline {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--color-gold) 55%, transparent), transparent);
+    }
+
+    /* ----- Микроанимации тихого регистра ----------------------------- */
+
+    /* Блик шёлка: узкая полоса тёплого света проходит по карточке при наведении */
+    .sheen {
+        position: relative;
+        overflow: hidden;
+    }
+    .sheen::after {
+        content: '';
+        position: absolute;
+        inset: -40%;
+        pointer-events: none;
+        background: linear-gradient(
+            115deg,
+            transparent 40%,
+            color-mix(in oklab, var(--color-gold-2) 22%, transparent) 50%,
+            transparent 60%
+        );
+        transform: translateX(-70%) rotate(0.001deg);
+        opacity: 0;
+        transition: opacity 0.4s var(--ease-cine);
+    }
+    .sheen:hover::after,
+    .sheen:focus-within::after {
+        opacity: 1;
+        animation: sheen-sweep 1.6s var(--ease-cine) forwards;
+    }
+    @keyframes sheen-sweep {
+        from { transform: translateX(-70%); }
+        to { transform: translateX(70%); }
+    }
+
+    /* Тёплое пятно света следует за курсором: координаты приходят из --mx/--my */
+    .cursor-glow {
+        position: relative;
+    }
+    .cursor-glow::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0;
+        transition: opacity 0.6s var(--ease-cine);
+        background: radial-gradient(
+            520px circle at var(--mx, 50%) var(--my, 50%),
+            color-mix(in oklab, var(--color-rose) 18%, transparent),
+            transparent 60%
+        );
+        mix-blend-mode: screen;
+    }
+    .cursor-glow:hover::before {
+        opacity: 1;
+    }
+
+    /* Медленное «дыхание» изображения — почти незаметно, но кадр живой */
+    .breathe {
+        transition: transform 1.8s var(--ease-cine), filter 0.6s var(--ease-cine);
+        will-change: transform;
+    }
+    .group:hover .breathe,
+    .sheen:hover .breathe {
+        transform: scale(1.035);
+    }
+
+    /* Ссылка с золотой нитью, растущей из-под текста */
+    .thread {
+        position: relative;
+        text-decoration: none;
+    }
+    .thread::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -0.15em;
+        height: 1px;
+        background: var(--color-gold);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.6s var(--ease-cine);
+    }
+    .thread:hover::after,
+    .thread[aria-current='page']::after {
+        transform: scaleX(1);
+    }
+
+    /* Кнопка: заливка золотом поднимается снизу, как уровень жидкости */
+    .btn-gold {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        border: 1px solid color-mix(in oklab, var(--color-gold) 70%, transparent);
+        color: var(--color-ivory);
+        transition: color 0.45s var(--ease-cine), border-color 0.45s var(--ease-cine);
+    }
+    .btn-gold::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: var(--color-gold);
+        transform: translateY(101%);
+        transition: transform 0.55s var(--ease-cine);
+    }
+    .btn-gold:hover:not(:disabled),
+    .btn-gold:focus-visible {
+        color: var(--color-void);
+        border-color: var(--color-gold);
+    }
+    .btn-gold:hover:not(:disabled)::before,
+    .btn-gold:focus-visible::before {
+        transform: translateY(0);
+    }
+    .btn-gold:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+    /* Оркестрованный вход страницы: дети получают задержку через --i */
+    .stagger > * {
+        animation: rise 1.1s var(--ease-cine) both;
+        animation-delay: calc(0.08s + var(--i, 0) * 0.07s);
+    }
+
+    /* Сенсорная шкала: пять точек, «заполненные» светятся */
+    .scale-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: color-mix(in oklab, var(--color-ivory) 14%, transparent);
+        transition: background 0.5s var(--ease-cine), box-shadow 0.5s var(--ease-cine), transform 0.3s var(--ease-cine);
+    }
+    .scale-dot[data-on='true'] {
+        background: var(--color-gold);
+        box-shadow: 0 0 10px color-mix(in oklab, var(--color-gold) 55%, transparent);
+    }
+    button.scale-dot:hover {
+        transform: scale(1.35);
+    }
+
+    /* Уведомление снизу: всплывает как выдох */
+    .toast-enter {
+        animation: toast-in 0.7s var(--ease-cine) both;
+    }
+    @keyframes toast-in {
+        from { opacity: 0; transform: translate(-50%, 12px); filter: blur(4px); }
+        to { opacity: 1; transform: translate(-50%, 0); filter: blur(0); }
+    }
+
+
+    /* Появление секции при входе в кадр — один раз, ставит .is-in */
+    .reveal > * {
+        opacity: 0;
+        transform: translateY(28px);
+        filter: blur(5px);
+        transition:
+            opacity 1.1s var(--ease-cine),
+            transform 1.1s var(--ease-cine),
+            filter 1.1s var(--ease-cine);
+        transition-delay: calc(var(--i, 0) * 0.08s);
+    }
+    .reveal.is-in > * {
+        opacity: 1;
+        transform: none;
+        filter: blur(0);
+    }
+
+    /* Секция целиком уже видима — детям задержку задаёт --i на них самих */
+    .reveal.is-in [style*='--i'] {
+        transition-delay: calc(var(--i, 0) * 0.08s);
+    }
+
+
+    /* Строки поверх редакционного кадра: поднимаются из-за нижней кромки */
+    .film-line {
+        display: block;
+        opacity: 0;
+        transform: translateY(0.4em);
+        filter: blur(4px);
+        transition:
+            opacity 1.2s var(--ease-cine),
+            transform 1.2s var(--ease-cine),
+            filter 1.2s var(--ease-cine);
+        transition-delay: calc(0.15s + var(--i, 0) * 0.14s);
+    }
+    .is-in .film-line {
+        opacity: 1;
+        transform: none;
+        filter: blur(0);
+    }
+
+
+    /* Переход между страницами: занавес проходит сверху вниз и уходит за край */
+    .page-curtain {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        transform: translateY(-101%);
+        will-change: transform;
+        background: linear-gradient(
+            180deg,
+            color-mix(in oklab, var(--color-wine) 86%, var(--color-void)),
+            var(--color-void)
+        );
+    }
+    .page-curtain::after {
+        content: '';
+        position: absolute;
+        inset-inline: 0;
+        bottom: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+        opacity: 0.75;
+    }
+    .page-curtain__mark {
+        font-family: var(--font-display);
+        font-size: clamp(3rem, 7vw, 6rem);
+        font-weight: 300;
+        letter-spacing: 0.12em;
+        color: color-mix(in oklab, var(--color-ivory) 70%, transparent);
+        opacity: 0;
+        transition: opacity 0.5s var(--ease-cine);
+    }
+    .page-curtain--cover {
+        transform: translateY(0);
+        transition: transform var(--cover, 620ms) var(--ease-curtain);
+    }
+    .page-curtain--cover .page-curtain__mark {
+        opacity: 0.55;
+        transition-delay: 0.3s;
+    }
+    .page-curtain--reveal {
+        transform: translateY(101%);
+        transition: transform var(--reveal, 900ms) var(--ease-curtain);
+    }
+    .page-curtain--instant {
+        transition: none !important;
+    }
+
+    /* Курсор: кольцо с инерцией и точка внутри */
+    .has-cursor,
+    .has-cursor * {
+        cursor: none;
+    }
+    .has-cursor input,
+    .has-cursor textarea,
+    .has-cursor select,
+    .has-cursor [contenteditable='true'] {
+        cursor: auto;
+    }
+    .v-cursor-ring,
+    .v-cursor-dot {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 70;
+        pointer-events: none;
+        border-radius: 9999px;
+        opacity: 0;
+        transition: opacity 0.3s var(--ease-cine);
+    }
+    .v-cursor-ring.is-live,
+    .v-cursor-dot.is-live {
+        opacity: 1;
+    }
+    .v-cursor-ring {
+        width: 34px;
+        height: 34px;
+        border: 1px solid color-mix(in oklab, var(--color-ivory) 45%, transparent);
+        transition:
+            width 0.45s var(--ease-cine),
+            height 0.45s var(--ease-cine),
+            border-color 0.45s var(--ease-cine),
+            background-color 0.45s var(--ease-cine),
+            opacity 0.3s var(--ease-cine);
+    }
+    .v-cursor-dot {
+        width: 4px;
+        height: 4px;
+        background: var(--color-gold-2);
+    }
+    /* Перекрестие лупы — видно только над кадрами */
+    .v-cursor-ring::before,
+    .v-cursor-ring::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        background: var(--color-gold-2);
+        opacity: 0;
+        transition: opacity 0.3s var(--ease-cine);
+    }
+    .v-cursor-ring::before {
+        width: 1px;
+        height: 14px;
+        transform: translate(-50%, -50%);
+    }
+    .v-cursor-ring::after {
+        width: 14px;
+        height: 1px;
+        transform: translate(-50%, -50%);
+    }
+    .v-cursor-ring[data-mode='link'] {
+        width: 54px;
+        height: 54px;
+        border-color: color-mix(in oklab, var(--color-gold) 80%, transparent);
+        background-color: color-mix(in oklab, var(--color-gold) 9%, transparent);
+    }
+    .v-cursor-ring[data-mode='lens'] {
+        width: 104px;
+        height: 104px;
+        border-color: color-mix(in oklab, var(--color-gold) 65%, transparent);
+        background-color: color-mix(in oklab, var(--color-gold) 5%, transparent);
+    }
+    .v-cursor-ring[data-mode='lens']::before,
+    .v-cursor-ring[data-mode='lens']::after {
+        opacity: 0.85;
+    }
+    .v-cursor-ring[data-mode='text'],
+    .v-cursor-dot[data-mode='text'] {
+        opacity: 0;
+    }
+    .v-cursor-ring.is-down {
+        width: 26px;
+        height: 26px;
+        border-color: var(--color-gold-2);
+    }
+
+    /* Кнопки, которые тянутся к курсору */
+    [data-magnetic] {
+        transition: transform 0.5s var(--ease-cine);
+    }
+
+    /* Меню на мобильных: шторка из бордо */
+    .curtain {
+        animation: curtain 0.8s var(--ease-cine) both;
+    }
+    @keyframes curtain {
+        from { clip-path: inset(0 0 100% 0); }
+        to { clip-path: inset(0 0 0 0); }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .film-grain {
+        animation: none;
+    }
+    .animate-rise,
+    .animate-veil,
+    .stagger > *,
+    .reveal > *,
+    .film-line,
+    .curtain,
+    .toast-enter {
+        animation: none;
+        opacity: 1;
+        transform: none;
+        filter: none;
+        clip-path: none;
+    }
+    .page-curtain,
+    .v-cursor-ring,
+    .v-cursor-dot {
+        display: none;
+    }
+    .has-cursor,
+    .has-cursor * {
+        cursor: auto;
+    }
+    .sheen::after,
+    .breathe,
+    [data-magnetic],
+    .cursor-glow::before {
+        animation: none;
+        transition: none;
+    }
+}

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -r '$j=json_decode\\(file_get_contents\\(\"composer.json\"\\),true\\); print_r\\($j[\"scripts\"][\"dev\"] ?? \"none\"\\);')",
+      "Bash(php *)",
+      "Bash(grep -c '^```' docs/LANDING-BRIEF.md)",
+      "Bash(echo \"code fences: $\\(grep -c '^```' docs/LANDING-BRIEF.md\\)\")",
+      "Bash(npx tsc *)"
+    ]
+  }
+}
