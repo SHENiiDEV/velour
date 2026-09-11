@@ -12,11 +12,18 @@ use Illuminate\Support\Str;
 
 class ImportProductsCommand extends Command
 {
-    protected $signature = 'catalog:import {file=database/data/svakom_catalog.json}';
+    protected $signature = 'catalog:import 
+                            {file=database/data/svakom_catalog.json}
+                            {--fresh : Clear the existing catalog before importing}';
+
     protected $description = 'Import products from Svakom catalog JSON or CSV';
 
     public function handle(): int
     {
+        if ($this->option('fresh')) {
+            $this->call('catalog:clear', ['--force' => true]);
+        }
+
         $file = base_path($this->argument('file'));
         if (!file_exists($file)) {
             // fallback to csv if json not found
@@ -438,4 +445,3 @@ class ImportProductsCommand extends Command
         ];
     }
 }
-
