@@ -347,6 +347,17 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                                     <span>•</span>
                                     <span>Zero Data Logs</span>
                                 </div>
+                                <div className="flex items-center justify-center gap-2.5 pt-1 opacity-85">
+                                    <div className="flex h-6 items-center justify-center rounded bg-white/95 px-2 py-0.5 shadow-sm">
+                                        <img src="/images/payment/visa.png" alt="Visa" className="h-3 w-auto object-contain" />
+                                    </div>
+                                    <div className="flex h-6 items-center justify-center rounded bg-white/95 px-2 py-0.5 shadow-sm">
+                                        <img src="/images/payment/mastercard.png" alt="Mastercard" className="h-3.5 w-auto object-contain" />
+                                    </div>
+                                    <div className="flex h-6 items-center justify-center rounded bg-white/95 px-2 py-0.5 shadow-sm">
+                                        <img src="/images/payment/pci-dss.png" alt="PCI DSS Compliant" className="h-3.5 w-auto object-contain" />
+                                    </div>
+                                </div>
                             </div>
                         </aside>
                     </form>
