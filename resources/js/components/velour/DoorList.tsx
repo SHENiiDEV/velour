@@ -15,7 +15,7 @@ export default function DoorList({ categories }: DoorListProps) {
     const [hover, setHover] = useState<string | null>(null);
 
     return (
-        <section ref={ref} className="reveal relative px-[6vw] py-8" aria-label="Sections">
+        <section ref={ref} className="reveal relative px-[5vw] py-8 sm:px-[6vw]" aria-label="Sections">
             <ul className="divide-y divide-ivory/10 border-y border-ivory/10">
                 {categories.map((c, i) => (
                     <li key={c.slug}>
@@ -23,7 +23,7 @@ export default function DoorList({ categories }: DoorListProps) {
                             href={`/catalog/${c.slug}`}
                             onMouseEnter={() => setHover(c.slug)}
                             onMouseLeave={() => setHover(null)}
-                            className="group relative grid items-baseline gap-2 overflow-hidden py-10 md:grid-cols-[1fr_1fr_auto] md:px-4"
+                            className="group relative grid items-baseline gap-2 overflow-hidden py-8 sm:py-10 md:grid-cols-[1fr_1fr_auto] md:px-4"
                             style={{ '--i': i } as React.CSSProperties}
                         >
                             {/* Тёплая заливка выезжает снизу, как свет из-под двери */}
@@ -32,14 +32,19 @@ export default function DoorList({ categories }: DoorListProps) {
                                 style={{ transform: hover === c.slug ? 'scaleY(1)' : 'scaleY(0)' }}
                                 aria-hidden
                             />
-                            <span className="font-display text-5xl font-light text-ivory transition-transform duration-700 ease-[var(--ease-cine)] group-hover:translate-x-4 md:text-7xl">
-                                {c.name}
-                            </span>
-                            <span className="font-display text-xl font-light italic text-mute transition-colors duration-500 group-hover:text-ivory/80">
+                            <div className="flex items-center justify-between md:block">
+                                <span className="font-display text-4xl font-light text-ivory transition-transform duration-700 ease-[var(--ease-cine)] group-hover:translate-x-3 sm:text-5xl md:text-7xl">
+                                    {c.name}
+                                </span>
+                                <span className="font-sans text-xs font-light tracking-wide text-gold-2 md:hidden">
+                                    →
+                                </span>
+                            </div>
+                            <span className="font-display text-base font-light italic text-mute transition-colors duration-500 group-hover:text-ivory/80 sm:text-xl">
                                 {c.tagline}
                             </span>
-                            <span className="font-sans text-sm font-light tracking-wide text-gold opacity-0 transition-all duration-500 group-hover:opacity-100">
-                                enter
+                            <span className="hidden font-sans text-sm font-light tracking-wide text-gold opacity-0 transition-all duration-500 group-hover:opacity-100 md:inline">
+                                enter →
                             </span>
                         </Link>
                     </li>

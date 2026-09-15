@@ -40,39 +40,39 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
 
     return (
         <VelourLayout title="Checkout & Safe Passage — VELOUR">
-            <section className="relative min-h-screen px-[6vw] pb-32 pt-36 md:pt-44">
+            <section className="relative min-h-screen px-[5vw] pb-32 pt-28 sm:px-[6vw] sm:pb-36 sm:pt-40">
                 {/* Ambient glow backgrounds */}
                 <div className="pointer-events-none absolute left-10 top-24 h-96 w-96 rounded-full bg-wine/15 blur-[120px]" />
                 <div className="pointer-events-none absolute right-10 top-60 h-80 w-80 rounded-full bg-gold/5 blur-[100px]" />
 
                 <div className="relative mx-auto max-w-7xl">
                     {/* Header */}
-                    <div className="border-b border-ivory/10 pb-8">
+                    <div className="border-b border-ivory/10 pb-6 sm:pb-8">
                         <span className="font-sans text-xs font-light tracking-[0.25em] text-gold-2 uppercase">
                             Private Passage
                         </span>
-                        <h1 className="mt-2 font-display text-5xl font-light text-ivory md:text-6xl">
+                        <h1 className="mt-2 font-display text-4xl font-light text-ivory sm:text-5xl md:text-6xl">
                             Discreet Checkout
                         </h1>
-                        <p className="mt-3 max-w-xl font-sans text-sm font-light leading-relaxed text-mute">
+                        <p className="mt-3 max-w-xl font-sans text-xs font-light leading-relaxed text-mute sm:text-sm">
                             Every order is packaged without branding or descriptions, dispatched discreetly, and billed under an innocuous name.
                         </p>
                     </div>
 
-                    <form onSubmit={submit} className="mt-12 grid gap-12 lg:grid-cols-[1fr_420px] xl:gap-16">
-                        {/* Main Checkout Form */}
-                        <div className="space-y-12">
+                    <form onSubmit={submit} className="mt-8 grid gap-8 sm:gap-12 lg:mt-12 lg:grid-cols-[1fr_420px] xl:gap-16">
+                        {/* Main Checkout Form Steps */}
+                        <div className="space-y-8 sm:space-y-12">
                             {/* Step 1: Contact Information */}
-                            <section className="rounded-sm border border-ivory/10 bg-surface/30 p-8 backdrop-blur-sm">
+                            <section className="rounded-sm border border-ivory/10 bg-surface/30 p-5 backdrop-blur-sm sm:p-8">
                                 <div className="flex items-center gap-3">
                                     <span className="font-display text-2xl font-light text-gold-2">01</span>
-                                    <h2 className="font-display text-3xl font-light text-ivory">Contact & Digital Receipt</h2>
+                                    <h2 className="font-display text-2xl font-light text-ivory sm:text-3xl">Contact & Digital Receipt</h2>
                                 </div>
                                 <p className="mt-2 font-sans text-xs font-light text-mute">
                                     We only send your private order tracking number. No newsletters or marketing emails.
                                 </p>
 
-                                <div className="mt-8 grid gap-8 sm:grid-cols-2">
+                                <div className="mt-6 grid gap-6 sm:grid-cols-2 sm:gap-8">
                                     <Field
                                         label="E-mail address (for order updates)"
                                         name="email"
@@ -98,16 +98,16 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                             </section>
 
                             {/* Step 2: Destination Address */}
-                            <section className="rounded-sm border border-ivory/10 bg-surface/30 p-8 backdrop-blur-sm">
+                            <section className="rounded-sm border border-ivory/10 bg-surface/30 p-5 backdrop-blur-sm sm:p-8">
                                 <div className="flex items-center gap-3">
                                     <span className="font-display text-2xl font-light text-gold-2">02</span>
-                                    <h2 className="font-display text-3xl font-light text-ivory">Destination & Delivery</h2>
+                                    <h2 className="font-display text-2xl font-light text-ivory sm:text-3xl">Destination & Delivery</h2>
                                 </div>
                                 <p className="mt-2 font-sans text-xs font-light text-mute">
                                     Shipped via trusted couriers in an unbranded, sealed parcel.
                                 </p>
 
-                                <div className="mt-8 grid gap-8 sm:grid-cols-2">
+                                <div className="mt-6 grid gap-6 sm:grid-cols-2 sm:gap-8">
                                     <Field
                                         className="sm:col-span-2"
                                         label="Recipient Full Name"
@@ -135,7 +135,7 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                                         label="Flat, Entrance, Parcel Locker / Pickup Point (Optional)"
                                         name="line2"
                                         autoComplete="address-line2"
-                                        placeholder="Entrance code, floor, or Omniva / DPD locker ID"
+                                        placeholder="Entrance code, floor, or parcel locker ID"
                                         value={form.data.shipping_address.line2}
                                         onChange={(e) => addr('line2', e.target.value)}
                                         error={err('shipping_address.line2')}
@@ -165,23 +165,23 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                                             <span className="font-sans text-xs font-light tracking-wide text-mute">
                                                 Country (ISO 2-letter code)
                                             </span>
-                                            <div className="mt-2 flex items-center gap-3">
+                                            <div className="mt-2 flex flex-wrap items-center gap-3">
                                                 <input
                                                     type="text"
                                                     maxLength={2}
                                                     autoComplete="country"
                                                     value={form.data.shipping_address.country}
                                                     onChange={(e) => addr('country', e.target.value.toUpperCase())}
-                                                    className="w-24 border-0 border-b border-ivory/20 bg-transparent px-0 py-2 font-display text-xl uppercase text-ivory outline-none focus:border-gold"
+                                                    className="w-20 border-0 border-b border-ivory/20 bg-transparent px-0 py-2 font-display text-xl uppercase text-ivory outline-none focus:border-gold"
                                                     required
                                                 />
-                                                <div className="flex flex-wrap gap-2 text-xs">
+                                                <div className="flex flex-wrap gap-1.5 text-xs">
                                                     {['LV', 'LT', 'EE', 'DE', 'FR', 'GB', 'US'].map((code) => (
                                                         <button
                                                             key={code}
                                                             type="button"
                                                             onClick={() => addr('country', code)}
-                                                            className={`rounded px-2 py-1 font-sans text-xs transition-colors ${
+                                                            className={`rounded px-2.5 py-1 font-sans text-xs transition-colors ${
                                                                 form.data.shipping_address.country === code
                                                                     ? 'bg-gold text-void font-medium'
                                                                     : 'bg-ivory/5 text-mute hover:text-ivory'
@@ -203,13 +203,13 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                             </section>
 
                             {/* Step 3: Discretion & Courier Instructions */}
-                            <section className="rounded-sm border border-ivory/10 bg-surface/30 p-8 backdrop-blur-sm">
+                            <section className="rounded-sm border border-ivory/10 bg-surface/30 p-5 backdrop-blur-sm sm:p-8">
                                 <div className="flex items-center gap-3">
                                     <span className="font-display text-2xl font-light text-gold-2">03</span>
-                                    <h2 className="font-display text-3xl font-light text-ivory">Discretion & Courier Notes</h2>
+                                    <h2 className="font-display text-2xl font-light text-ivory sm:text-3xl">Discretion & Courier Notes</h2>
                                 </div>
 
-                                <div className="mt-8 space-y-6">
+                                <div className="mt-6 space-y-6">
                                     <LuxuryCheck
                                         checked={form.data.discreet_packaging}
                                         onChange={(v) => form.setData('discreet_packaging', v)}
@@ -235,13 +235,13 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                             </section>
 
                             {/* Step 4: Verification & Covenant */}
-                            <section className="rounded-sm border border-ivory/10 bg-surface/30 p-8 backdrop-blur-sm">
+                            <section className="rounded-sm border border-ivory/10 bg-surface/30 p-5 backdrop-blur-sm sm:p-8">
                                 <div className="flex items-center gap-3">
                                     <span className="font-display text-2xl font-light text-gold-2">04</span>
-                                    <h2 className="font-display text-3xl font-light text-ivory">Legal Covenant & Age</h2>
+                                    <h2 className="font-display text-2xl font-light text-ivory sm:text-3xl">Legal Covenant & Age</h2>
                                 </div>
 
-                                <div className="mt-8 space-y-6">
+                                <div className="mt-6 space-y-6">
                                     <LuxuryCheck
                                         checked={form.data.age_confirmed}
                                         onChange={(v) => form.setData('age_confirmed', v)}
@@ -252,16 +252,16 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                                     <LuxuryCheck
                                         checked={form.data.terms_accepted}
                                         onChange={(v) => form.setData('terms_accepted', v)}
-                                        title="I accept the Terms of Engagement & Discretion Manifesto"
+                                        title="I accept the Terms & Discretion Manifesto"
                                         text={
                                             <span>
-                                                I have read and agree to the{' '}
+                                                I agree to the{' '}
                                                 <Link href="/terms" target="_blank" className="text-gold-2 underline underline-offset-4 hover:text-ivory">
-                                                    Terms of Engagement
+                                                    Terms
                                                 </Link>{' '}
-                                                and the{' '}
+                                                and{' '}
                                                 <Link href="/privacy" target="_blank" className="text-gold-2 underline underline-offset-4 hover:text-ivory">
-                                                    Privacy & Discretion Manifesto
+                                                    Discretion Manifesto
                                                 </Link>
                                                 .
                                             </span>
@@ -279,10 +279,10 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                         </div>
 
                         {/* Right Sidebar: Order Summary & Discretion Visualizer */}
-                        <aside className="lg:sticky lg:top-36 lg:self-start space-y-6">
+                        <aside className="space-y-6 lg:sticky lg:top-36 lg:self-start">
                             {/* Bank Descriptor Simulator Card */}
                             <div
-                                className="relative overflow-hidden rounded-sm border border-ivory/15 p-6 backdrop-blur-md"
+                                className="relative overflow-hidden rounded-sm border border-ivory/15 p-5 backdrop-blur-md sm:p-6"
                                 style={{
                                     background:
                                         'linear-gradient(135deg, color-mix(in oklab, var(--color-graphite) 95%, transparent), color-mix(in oklab, var(--color-wine) 65%, var(--color-void)))',
@@ -293,7 +293,7 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                                         <span className="font-sans text-[10px] font-medium tracking-[0.2em] text-gold-2 uppercase">
                                             Bank Statement Preview
                                         </span>
-                                        <p className="mt-1 font-display text-2xl text-ivory">
+                                        <p className="mt-1 font-display text-2xl text-ivory sm:text-3xl">
                                             {privacy.statementDescriptor}
                                         </p>
                                     </div>
@@ -305,16 +305,16 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                             </div>
 
                             {/* Order Items Preview */}
-                            <div className="rounded-sm border border-ivory/10 bg-surface/40 p-6 backdrop-blur-sm">
-                                <h3 className="font-display text-lg font-light text-ivory">Selected Items</h3>
+                            <div className="rounded-sm border border-ivory/10 bg-surface/40 p-5 backdrop-blur-sm sm:p-6">
+                                <h3 className="font-display text-lg font-light text-ivory">Selected Items ({cart.items.length})</h3>
                                 <ul className="mt-4 divide-y divide-ivory/10">
                                     {cart.items.map((it) => (
-                                        <li key={it.id} className="flex items-center gap-4 py-3">
-                                            <div className="relative h-14 w-11 shrink-0 overflow-hidden rounded-[2px] border border-ivory/10 bg-void/50">
+                                        <li key={it.id} className="flex items-center gap-3 py-3 sm:gap-4">
+                                            <div className="relative h-12 w-10 shrink-0 overflow-hidden rounded-[2px] border border-ivory/10 bg-void/50 sm:h-14 sm:w-11">
                                                 <Veil media={it.product.cover} ratio="4 / 5" sizes="50px" />
                                             </div>
                                             <div className="min-w-0 flex-1">
-                                                <p className="truncate font-display text-base font-light text-ivory">
+                                                <p className="truncate font-display text-sm font-light text-ivory sm:text-base">
                                                     {it.product.name}
                                                 </p>
                                                 <p className="font-sans text-xs font-light text-mute">
@@ -370,7 +370,7 @@ function LuxuryCheck({
     error?: string;
 }) {
     return (
-        <label className="group flex cursor-pointer items-start gap-4 select-none">
+        <label className="group flex cursor-pointer items-start gap-3.5 select-none">
             <span
                 className={`mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-[2px] border transition-all duration-300 ${
                     checked
@@ -394,7 +394,7 @@ function LuxuryCheck({
                 onChange={(e) => onChange(e.target.checked)}
             />
             <span className="flex-1">
-                <span className="block font-display text-xl font-light text-ivory transition-colors group-hover:text-gold-2">
+                <span className="block font-display text-lg sm:text-xl font-light text-ivory transition-colors group-hover:text-gold-2">
                     {title}
                 </span>
                 {text && (
