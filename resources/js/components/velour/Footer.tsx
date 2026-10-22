@@ -1,8 +1,12 @@
 import { Link } from '@inertiajs/react';
+import { useCompany } from '@/hooks/use-company';
+import CompanyDetails from './CompanyDetails';
 import DiscreetToggle from './DiscreetToggle';
 import QuickExit from './QuickExit';
 
 export default function Footer() {
+    const company = useCompany();
+
     return (
         <footer className="px-[5vw] pb-safe pt-20 sm:px-[6vw] sm:pt-24 sm:pb-16 border-t border-ivory/10 bg-void/50">
             <div className="grid gap-10 font-sans text-xs sm:text-sm font-light text-mute md:grid-cols-4">
@@ -65,6 +69,11 @@ export default function Footer() {
                                 Terms of Engagement
                             </Link>
                         </li>
+                        <li>
+                            <a href={`mailto:${company.email}`} className="transition-colors hover:text-ivory">
+                                {company.email}
+                            </a>
+                        </li>
                         <li className="text-gold-2/80">
                             Strictly Consenting Adults 18+
                         </li>
@@ -101,8 +110,8 @@ export default function Footer() {
             </div>
 
             <div className="mt-6 flex flex-col sm:flex-row items-center justify-between border-t border-ivory/5 pt-6 text-[11px] text-mute/60">
-                <p>© {new Date().getFullYear()} VELOUR. All rights reserved.</p>
-                <p className="mt-2 sm:mt-0">Atelier of Sensations · Anonymous Packaging</p>
+                <p>© {new Date().getFullYear()} {company.name}. All rights reserved.</p>
+                <CompanyDetails className="mt-2 sm:mt-0 text-center sm:text-right" />
             </div>
         </footer>
     );

@@ -1,3 +1,5 @@
+import CompanyDetails from '@/components/velour/CompanyDetails';
+import { useCompany } from '@/hooks/use-company';
 import VelourLayout from '@/layouts/velour-layout';
 
 const PILLARS = [
@@ -34,6 +36,8 @@ const PILLARS = [
 ];
 
 export default function Privacy() {
+    const company = useCompany();
+
     return (
         <VelourLayout title="Privacy & Discretion — VELOUR">
             {/* Ambient background glow */}
@@ -92,8 +96,12 @@ export default function Privacy() {
                         Want your record erased?
                     </p>
                     <p className="mt-2 font-sans text-sm font-light leading-relaxed text-mute">
-                        Contact us at <span className="text-gold-2">concierge@velour-retail.com</span>. We will confirm deletion within 14 business days, no questions asked.
+                        Contact us at <a href={`mailto:${company.email}`} className="text-gold-2 hover:text-gold">{company.email}</a>. We will confirm deletion within 14 business days, no questions asked.
                     </p>
+                    <div className="mt-6 border-t border-ivory/10 pt-4 font-sans text-xs font-light text-mute/80">
+                        <span className="text-ivory/70">Data controller:</span>
+                        <CompanyDetails className="mt-1" />
+                    </div>
                 </div>
             </section>
         </VelourLayout>

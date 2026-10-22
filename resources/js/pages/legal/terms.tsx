@@ -1,3 +1,5 @@
+import CompanyDetails from '@/components/velour/CompanyDetails';
+import { useCompany } from '@/hooks/use-company';
 import VelourLayout from '@/layouts/velour-layout';
 
 const TERMS = [
@@ -34,6 +36,8 @@ const TERMS = [
 ];
 
 export default function Terms() {
+    const company = useCompany();
+
     return (
         <VelourLayout title="Terms & Standard of Care — VELOUR">
             {/* Ambient background glow */}
@@ -85,8 +89,12 @@ export default function Terms() {
                         Have questions about a specific piece?
                     </p>
                     <p className="mt-2 font-sans text-sm font-light leading-relaxed text-mute">
-                        Our confidential concierge team is available at <span className="text-gold-2">care@velour-retail.com</span> to provide detailed guidance.
+                        Our confidential concierge team is available at <a href={`mailto:${company.email}`} className="text-gold-2 hover:text-gold">{company.email}</a> to provide detailed guidance.
                     </p>
+                    <div className="mt-6 border-t border-ivory/10 pt-4 font-sans text-xs font-light text-mute/80">
+                        <span className="text-ivory/70">Seller:</span>
+                        <CompanyDetails className="mt-1" />
+                    </div>
                 </div>
             </section>
         </VelourLayout>

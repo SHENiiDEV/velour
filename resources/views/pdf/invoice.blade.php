@@ -187,6 +187,7 @@
     </style>
 </head>
 <body>
+@php($company = config('velour.company'))
 
     <!-- Header -->
     <table class="header">
@@ -198,6 +199,12 @@
             <td style="vertical-align: middle;">
                 <div class="doc-title">Receipt & Invoice</div>
                 <div class="doc-meta">#{{ $order->number }} · {{ $order->created_at ? $order->created_at->format('M d, Y') : date('M d, Y') }}</div>
+                <div class="doc-meta" style="margin-top: 6px;">
+                    Seller: {{ $company['name'] }}
+                    @if($company['reg_number'])<br>Reg. No. {{ $company['reg_number'] }}@endif
+                    @if($company['address'])<br>{{ $company['address'] }}@endif
+                    <br>{{ $company['email'] }}
+                </div>
             </td>
         </tr>
     </table>
@@ -308,7 +315,7 @@
 
     <!-- Footer -->
     <div class="footer">
-        <span class="footer-gold">VELOUR</span> · velour-retail.com · info@velour-retail.com
+        <span class="footer-gold">{{ $company['name'] }}</span>@if($company['reg_number']) · Reg. No. {{ $company['reg_number'] }}@endif @if($company['address']) · {{ $company['address'] }}@endif · {{ $company['email'] }}
         <br>
         <span style="font-size: 9px; color: #736762;">All items covered by our 14-Day Hygiene & Craftsmanship Guarantee.</span>
     </div>

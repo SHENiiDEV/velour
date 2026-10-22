@@ -266,8 +266,10 @@
             <!-- Footer -->
             <tr>
                 <td class="footer">
-                    VELOUR · Confidential Dispatch Atelier<br>
-                    Questions? Contact us discreetly at <a href="mailto:info@velour-retail.com" style="color: #c6a15b; text-decoration: none;">info@velour-retail.com</a><br>
+                    @php($company = config('velour.company'))
+                    {{ $company['name'] }}@if($company['reg_number']) · Reg. No. {{ $company['reg_number'] }}@endif<br>
+                    @if($company['address']){{ $company['address'] }}<br>@endif
+                    Questions? Contact us discreetly at <a href="mailto:{{ $company['email'] }}" style="color: #c6a15b; text-decoration: none;">{{ $company['email'] }}</a><br>
                     <span style="font-size: 10px; color: #574c48; margin-top: 6px; display: block;">
                         No promotional emails will be sent unless explicitly requested.
                     </span>

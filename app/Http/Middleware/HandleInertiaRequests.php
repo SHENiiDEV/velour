@@ -33,6 +33,7 @@ class HandleInertiaRequests extends Middleware
                 'ageVerified' => EnsureAgeVerified::isVerified($request),
                 'exitUrl' => config('velour.exit_url'),
             ],
+            'company' => config('velour.company'),
             'flash' => [
                 'status' => fn () => $request->session()->get('status'),
             ],

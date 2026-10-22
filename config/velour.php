@@ -19,6 +19,17 @@ return [
     */
     'discreet_packaging_default' => true,
 
+    /*
+    | Юридические реквизиты продавца. Единый источник для футера, legal-страниц,
+    | PDF-инвойсов и писем. Задаются в .env (COMPANY_*).
+    */
+    'company' => [
+        'name' => env('COMPANY_NAME', 'VELOUR'),
+        'address' => env('COMPANY_ADDRESS', ''),
+        'reg_number' => env('COMPANY_REG_NUMBER', ''),
+        'email' => env('COMPANY_EMAIL', env('MAIL_FROM_ADDRESS', 'info@velour-retail.com')),
+    ],
+
     'currency' => env('VELOUR_CURRENCY', 'EUR'),
 
     'shipping' => [

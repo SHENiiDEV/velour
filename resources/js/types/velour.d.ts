@@ -12,11 +12,20 @@ export interface PrivacyProps {
     exitUrl: string;
 }
 
+/** Юридические реквизиты продавца (config/velour.php → company). */
+export interface CompanyProps {
+    name: string;
+    address: string;
+    reg_number: string;
+    email: string;
+}
+
 /** Shared props из HandleInertiaRequests::share(). */
 export interface SharedProps {
     name: string;
     auth: { user: AuthUser | null };
     privacy: PrivacyProps;
+    company: CompanyProps;
     flash: { status: string | null };
     cartCount: number;
     [key: string]: unknown;
