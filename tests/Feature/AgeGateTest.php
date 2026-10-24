@@ -40,3 +40,23 @@ it('toggles discreet mode', function () {
         ->assertRedirect('/')
         ->assertCookie(DiscreetModeController::COOKIE, '1');
 });
+
+it('skips the age gate with a valid preview token and strips it from the url', function () {
+    config(['velour.age_gate_bypass_token' => 'secret-preview-token']);
+
+    $this->get('/catalog?preview=secret-preview-token&sort=new')
+        ->assertRedirect('/catalog?sort=new')
+        ->assertCookie(EnsureAgeVerified::COOKIE, EnsureAgeVerified::VALUE);
+});
+
+it('ignores a wrong preview token', function () {
+    config(['velour.age_gate_bypass_token' => 'secret-preview-token']);
+
+    $this->get('/?preview=guess')->assertRedirect(route('age.show'));
+});
+
+it('keeps the bypass disabled when no token is configured', function () {
+    config(['velour.age_gate_bypass_token' => '']);
+
+    $this->get('/?preview=')->assertRedirect(route('age.show'));
+});

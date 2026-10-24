@@ -29,14 +29,7 @@ class AgeGateController extends Controller
 
         return redirect()
             ->to($intended)
-            ->withCookie(cookie(
-                name: EnsureAgeVerified::COOKIE,
-                value: EnsureAgeVerified::VALUE,
-                minutes: EnsureAgeVerified::TTL_DAYS * 24 * 60,
-                secure: $request->isSecure(),
-                httpOnly: true,
-                sameSite: 'lax',
-            ));
+            ->withCookie(EnsureAgeVerified::makeCookie($request));
     }
 
     /** Пользователь отказался — ничего не ставим, уводим на нейтральный сайт. */

@@ -5,6 +5,12 @@ return [
     | Куда уводим при «быстром выходе» и при отказе на age-gate.
     | Нейтральный сайт без следов в истории (фронт делает location.replace).
     */
+    /*
+    | Секретный обход age-gate для тестов и превью: /?preview=<токен>.
+    | Пусто — обход выключен. Используй длинную случайную строку (Str::random(32)).
+    */
+    'age_gate_bypass_token' => env('AGE_GATE_BYPASS_TOKEN', ''),
+
     'exit_url' => env('VELOUR_EXIT_URL', 'https://www.google.com'),
 
     /*

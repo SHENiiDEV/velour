@@ -34,6 +34,14 @@ class EnsureAgeVerified
 
     public function handle(Request $request, Closure $next): Response
     {
+        // Обход для тестов/превью: ?preview=<AGE_GATE_BYPASS_TOKEN>.
+        // Ставим ту же cookie, что и кнопка подтверждения, и убираем токен из адреса.
+        if ($this->hasBypassToken($request)) {
+            return redirect()
+                ->to($request->fullUrlWithoutQuery('preview'))
+                ->withCookie(self::makeCookie($request));
+        }
+
         if ($this->isVerified($request) || $this->isExcluded($request)) {
             return $next($request);
         }
@@ -44,6 +52,31 @@ class EnsureAgeVerified
         }
 
         return redirect()->route('age.show');
+    }
+
+    /** Cookie подтверждения возраста — общая для кнопки на age-gate и preview-токена. */
+    public static function makeCookie(Request $request): \Symfony\Component\HttpFoundation\Cookie
+    {
+        return cookie(
+            name: self::COOKIE,
+            value: self::VALUE,
+            minutes: self::TTL_DAYS * 24 * 60,
+            secure: $request->isSecure(),
+            httpOnly: true,
+            sameSite: 'lax',
+        );
+    }
+
+    /** Пустой токен в .env = обход выключен. Сравнение за постоянное время. */
+    protected function hasBypassToken(Request $request): bool
+    {
+        $token = (string) config('velour.age_gate_bypass_token');
+        $given = $request->query('preview');
+
+        return $token !== ''
+            && $request->isMethod('GET')
+            && is_string($given)
+            && hash_equals($token, $given);
     }
 
     public static function isVerified(Request $request): bool
