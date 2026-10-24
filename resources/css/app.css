@@ -595,3 +595,59 @@
     }
 }
 
+/* Описание товара: очищенный HTML из импорта (см. App\Support\HtmlSanitizer). */
+.velour-prose {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 300;
+    line-height: 1.75;
+    color: var(--color-mute);
+}
+.velour-prose > * + * { margin-top: 0.9em; }
+.velour-prose strong { font-weight: 500; color: var(--color-ivory); }
+.velour-prose em { font-style: italic; }
+.velour-prose a { color: var(--color-gold-2); text-decoration: underline; text-underline-offset: 3px; }
+.velour-prose h3,
+.velour-prose h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    color: var(--color-ivory);
+    line-height: 1.2;
+}
+.velour-prose h3 { font-size: 1.5rem; margin-top: 1.4em; }
+.velour-prose h4 { font-size: 1.25rem; margin-top: 1.2em; }
+.velour-prose ul,
+.velour-prose ol { padding-left: 1.1em; }
+.velour-prose ul { list-style: none; }
+.velour-prose ul li { position: relative; }
+.velour-prose ul li::before {
+    content: '';
+    position: absolute;
+    left: -1em;
+    top: 0.75em;
+    width: 4px;
+    height: 4px;
+    border-radius: 9999px;
+    background: var(--color-gold);
+}
+.velour-prose ol { list-style: decimal; }
+.velour-prose li + li { margin-top: 0.35em; }
+.velour-prose blockquote {
+    border-left: 1px solid var(--color-gold);
+    padding-left: 1em;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--color-ivory);
+}
+/* Таблицы характеристик из Woo → спокойный список «параметр — значение». */
+.velour-prose table { width: 100%; border-collapse: collapse; margin-top: 1.4em; }
+.velour-prose tr { border-bottom: 1px solid color-mix(in oklab, var(--color-ivory) 10%, transparent); }
+.velour-prose tr:first-child { border-top: 1px solid color-mix(in oklab, var(--color-ivory) 10%, transparent); }
+.velour-prose td,
+.velour-prose th { padding: 0.6em 0; vertical-align: top; text-align: left; color: var(--color-mute); font-size: inherit; }
+.velour-prose td:first-child,
+.velour-prose th:first-child { width: 38%; padding-right: 1em; }
+.velour-prose td:first-child strong,
+.velour-prose th { font-weight: 400; color: var(--color-ivory); text-transform: capitalize; }
+.velour-prose td:first-child strong { display: inline-block; text-transform: lowercase; }
+.velour-prose td:first-child strong::first-letter { text-transform: uppercase; }

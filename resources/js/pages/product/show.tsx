@@ -311,9 +311,11 @@ export default function ProductShow({ product, related }: ProductShowProps) {
                                     </p>
                                 )}
                                 {product.description && (
-                                    <p className="mt-4 whitespace-pre-line font-sans text-sm font-light leading-relaxed text-mute">
-                                        {product.description}
-                                    </p>
+                                    <div
+                                        className="velour-prose mt-4"
+                                        // HTML очищен на сервере (App\Support\HtmlSanitizer) — белый список тегов, без атрибутов.
+                                        dangerouslySetInnerHTML={{ __html: product.description }}
+                                    />
                                 )}
                             </Disclosure>
                             <Disclosure title="Care & Preservation" open={open === 'care'} onToggle={() => setOpen(open === 'care' ? null : 'care')}>
