@@ -75,8 +75,8 @@ export default function Terms() {
                     title: 'Right of withdrawal',
                     body: (
                         <p>
-                            You may withdraw within 14 days of receiving the goods, except for sealed intimate products opened after delivery
-                            and personalised items. How it works, refunds and the model form: <Link href="/returns">Returns &amp; withdrawal</Link>.
+                            You may withdraw within 14 days of receiving the goods, except for sealed intimate products opened after delivery.
+                            How it works, refunds and the model form: <Link href="/returns">Returns &amp; withdrawal</Link>.
                         </p>
                     ),
                 },

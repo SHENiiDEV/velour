@@ -11,6 +11,7 @@ use App\Models\ProductAttribute;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -71,7 +72,8 @@ class CatalogController extends Controller
     public function show(Product $product): Response
     {
         // Черновики видны только админам — правило живёт в политике, не в запросе.
-        $this->authorize('view', $product);
+        // Для покупателя снятый с витрины товар просто не существует: 404, а не 403 (М14).
+        abort_unless(Gate::allows('view', $product), 404);
 
         $product->load(['media', 'variants.media', 'category']);
 

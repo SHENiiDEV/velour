@@ -63,6 +63,10 @@ class CatalogCleaner
         'a SVAKOM Intelligent Mode' => 'an Intelligent Mode',
         'SVAKOM Intelligent Mode' => 'Intelligent Mode',
         'a Intelligent Mode' => 'an Intelligent Mode',
+        // ELMER — машинный перевод производителя (аудит, М9).
+        'which highly imitates the vibration frequency in the whole process of sex from the beginning to orgasm.' => 'that follows the natural rise of arousal, from the first slow build to the peak.',
+        'Single-click the S button, you can start a wonderful sex journey.' => 'One press of the S button is all it takes.',
+        'From bashful foreplay, sexy teasing, strong pulsing, to multiple climaxes, it brings you a heavenly sex experience you don\'t want to miss.' => 'It moves from shy, gentle teasing to strong pulses and repeated peaks — an arc worth following to the end.',
     ];
 
     /** Честные описания категорий — под реальный ассортимент (В7). */
@@ -211,7 +215,21 @@ class CatalogCleaner
 
     protected function tagline(?string $current, string $text): ?string
     {
-        if ($current !== null && ! in_array(trim($current), self::PLACEHOLDER_TAGLINES, true)
+        // Старый импорт склеивал заголовок и первую фразу через перенос строки:
+        // «The Hands-Free Upgrade…\n\nSome toys ask…» — на карточке они слипались (М15).
+        // Вторую строку старый импорт ещё и резал на 90-м символе — её берём целиком из описания.
+        if ($current !== null && preg_match('/\R/u', trim($current)) && ! preg_match('/svakom|online shop/i', $current)) {
+            $lines = preg_split('/\R+/u', trim($current));
+            $heading = trim(array_shift($lines));
+            // Нет описания — оставляем исходную вторую строку как есть.
+            $sentence = $this->tagline(null, $text) ?? implode(' ', $lines);
+            $current = $this->joinLines($heading."\n".$sentence);
+        }
+
+        // Подзаголовки, которые обрезала сама чистка («…»), пересчитываем — вдруг текст исправлен.
+        $generated = $current !== null && str_ends_with(trim($current), '…');
+
+        if ($current !== null && ! $generated && ! in_array(trim($current), self::PLACEHOLDER_TAGLINES, true)
             && ! preg_match('/svakom|online shop/i', $current) && ! $this->looksTruncated($current)) {
             return strtr($current, self::TYPOS);
         }
@@ -235,6 +253,19 @@ class CatalogCleaner
         }
 
         return null;
+    }
+
+    /** «Заголовок\n\nФраза» → «Заголовок. Фраза.» */
+    protected function joinLines(string $text): string
+    {
+        $parts = array_values(array_filter(array_map(
+            fn ($line) => rtrim(trim($line), ' .'),
+            preg_split('/\R+/u', trim($text))
+        ), fn ($line) => $line !== ''));
+
+        $joined = str_replace(['?.', '!.'], ['?', '!'], implode('. ', $parts).'.');
+
+        return $this->clip($joined, 160);
     }
 
     /** Обрезка по словам с многоточием — никаких «…frequency in the w». */

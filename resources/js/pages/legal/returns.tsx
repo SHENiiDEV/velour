@@ -42,15 +42,11 @@ Signature (only if this form is sent on paper)`;
                     id: 'exceptions',
                     title: 'What cannot be returned',
                     body: (
-                        <ul>
-                            <li>
-                                <strong>Sealed intimate products whose seal has been opened after delivery.</strong> For health protection
-                                and hygiene reasons the right of withdrawal ends once the seal is broken.
-                            </li>
-                            <li>
-                                <strong>Personalised items</strong>, such as pieces engraved to your request.
-                            </li>
-                        </ul>
+                        <p>
+                            <strong>Sealed intimate products whose seal has been opened after delivery.</strong> For health protection and
+                            hygiene reasons the right of withdrawal ends once the seal is broken. A fault is always covered by the legal
+                            guarantee below, opened or not.
+                        </p>
                     ),
                 },
                 {

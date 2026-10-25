@@ -58,3 +58,30 @@ it('is idempotent', function () {
 
     expect($product->fresh()->only(['name', 'tagline', 'description', 'materials']))->toBe($first);
 });
+
+it('splits a heading glued to the first sentence with a full stop', function () {
+    $product = Product::factory()->create([
+        'name' => 'KLITTY',
+        // Старый импорт: заголовок + фраза через перенос, обрезано на 90-м символе.
+        'tagline' => "Meet The Cat With A Curious Tongue\n\nNot every toy needs to look like a t",
+        'description' => '<p>Not every toy needs to look like a toy. Klitty hides a curious tongue inside a playful shape.</p>',
+    ]);
+
+    app(CatalogCleaner::class)->clean($product->fresh('media'));
+
+    expect($product->fresh()->tagline)->toBe('Meet The Cat With A Curious Tongue. Not every toy needs to look like a toy.');
+});
+
+it('rewrites the machine-translated ELMER copy, including a tagline it clipped earlier', function () {
+    $product = Product::factory()->create([
+        'name' => 'ELMER',
+        'tagline' => 'Elmer has an Intelligent Mode which highly imitates the vibration frequency in the whole process of sex from the…',
+        'description' => '<p>Elmer has a SVAKOM Intelligent Mode which highly imitates the vibration frequency in the whole process of sex from the beginning to orgasm. Single-click the S button, you can start a wonderful sex journey.</p>',
+    ]);
+
+    app(CatalogCleaner::class)->clean($product->fresh('media'));
+    $product->refresh();
+
+    expect($product->description)->not->toContain('highly imitates')->not->toContain('sex journey')
+        ->and($product->tagline)->toBe('Elmer has an Intelligent Mode that follows the natural rise of arousal, from the first slow build to the peak.');
+});

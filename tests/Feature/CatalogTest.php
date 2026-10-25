@@ -27,7 +27,7 @@ it('lists live products', function () {
 it('hides draft products from guests but shows them to admins', function () {
     $draft = Product::factory()->draft()->has(Variant::factory())->create();
 
-    $this->get("/p/{$draft->slug}")->assertForbidden();
+    $this->get("/p/{$draft->slug}")->assertNotFound();
 
     $admin = \App\Models\User::factory()->create(['is_admin' => true]);
 
