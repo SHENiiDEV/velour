@@ -7,6 +7,7 @@ use App\Enums\ProductStatus;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Variant;
+use App\Services\Catalog\CatalogCleaner;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 
@@ -38,11 +39,17 @@ class ImportProductsCommand extends Command
 
         $this->info("Importing from: {$file}");
 
-        if (str_ends_with($file, '.json')) {
-            return $this->importFromJson($file);
+        $code = str_ends_with($file, '.json')
+            ? $this->importFromJson($file)
+            : $this->importFromCsv($file);
+
+        if ($code === 0) {
+            // Бренд, честные материалы, тексты без шаблонов, discreet-флаги — см. CatalogCleaner.
+            $stats = app(CatalogCleaner::class)->run();
+            $this->info("Cleaned {$stats['products']} products, unpublished {$stats['unpublished']}.");
         }
 
-        return $this->importFromCsv($file);
+        return $code;
     }
 
     protected function importFromJson(string $filePath): int
@@ -97,22 +104,13 @@ class ImportProductsCommand extends Command
             $descriptionHtml = trim($item['description_html'] ?? $item['description_clean'] ?? '');
             $cleanDesc = trim(strip_tags($descriptionHtml));
             $firstSentence = explode('.', $cleanDesc)[0] ?? '';
-            $tagline = Str::limit(trim($firstSentence), 90, '');
-            if (!$tagline || strlen($tagline) < 10) {
-                $tagline = 'Designed for intuitive touch, quiet power, and intimate discovery';
-            }
+            // Подзаголовок по словам, без шаблонной заглушки — финально его считает CatalogCleaner.
+            $tagline = null;
 
             $materialsRaw = $item['materials'] ?? '';
             $materials = $this->parseMaterials($materialsRaw, $title, $descriptionHtml);
 
-            $care = trim($item['care'] ?? '');
-            if (!$care) {
-                $care = 'Clean thoroughly with warm water and mild soap or specialized toy cleaner before and after each use. Pat dry with a lint-free cloth and store away from direct sunlight.';
-            }
-
-            $story = $this->generateStory($title, $materials, $categoryName);
-
-            $sensory = $this->generateSensory($materials, $title, $categoryName);
+            $care = trim($item['care'] ?? '') ?: 'Clean thoroughly with warm water and mild soap or a toy cleaner before and after each use. Pat dry and store away from direct sunlight.';
 
             $isFeatured = in_array($sku, $featuredSkus, true) || ($index < 6 && $index % 2 === 0);
 
@@ -123,16 +121,18 @@ class ImportProductsCommand extends Command
                     'name' => $title,
                     'tagline' => $tagline,
                     'description' => $descriptionHtml,
-                    'story' => $story,
+                    // Генерированные «история» и «сенсорные характеристики» убраны:
+                    // реальных данных у источника нет (аудит, В2/В4).
+                    'story' => null,
                     'care' => $care,
                     'materials' => $materials,
                     'price_cents' => $priceCents,
                     'currency' => config('velour.currency', 'EUR'),
                     'status' => ProductStatus::Live,
-                    'is_body_safe' => true,
+                    'is_body_safe' => false,
                     'is_featured' => $isFeatured,
                     'published_at' => now()->subHours($index),
-                    'attributes' => $sensory,
+                    'attributes' => [],
                 ]
             );
 
@@ -159,7 +159,7 @@ class ImportProductsCommand extends Command
                         ['sku' => $vSku],
                         [
                             'product_id' => $product->id,
-                            'name' => trim($v['title'] ?? 'Standard') ?: 'Standard',
+                            'name' => $this->variantName($v['title'] ?? null),
                             'price_cents' => $vPriceCents > 0 ? $vPriceCents : $priceCents,
                             'stock' => ($v['available'] ?? true) ? 15 : 0,
                             'is_default' => $vIndex === 0,
@@ -185,7 +185,7 @@ class ImportProductsCommand extends Command
                         'path' => $relPath,
                         'alt' => "{$title} — View " . ($pos + 1),
                         'kind' => MediaKind::Image,
-                        'is_discreet_safe' => true,
+                        'is_discreet_safe' => false,
                         'position' => $pos++,
                         'meta' => [
                             'w' => 1000,
@@ -203,7 +203,7 @@ class ImportProductsCommand extends Command
                             'path' => $imagePath,
                             'alt' => "{$title} — View " . ($pos + 1),
                             'kind' => MediaKind::Image,
-                            'is_discreet_safe' => true,
+                            'is_discreet_safe' => false,
                             'position' => $pos++,
                             'meta' => [
                                 'w' => $img['width'] ?? 1000,
@@ -289,16 +289,16 @@ class ImportProductsCommand extends Command
                     'name' => $title,
                     'tagline' => $tagline,
                     'description' => $description,
-                    'story' => $this->generateStory($title, $materials, $categoryName),
+                    'story' => null,
                     'care' => $care,
                     'materials' => $materials,
                     'price_cents' => $priceCents,
                     'currency' => config('velour.currency', 'EUR'),
                     'status' => ProductStatus::Live,
-                    'is_body_safe' => true,
+                    'is_body_safe' => false,
                     'is_featured' => false,
                     'published_at' => now(),
-                    'attributes' => $this->generateSensory($materials, $title, $categoryName),
+                    'attributes' => [],
                 ]
             );
 
@@ -329,35 +329,35 @@ class ImportProductsCommand extends Command
                 'slug' => 'objects',
                 'name' => 'Objects',
                 'tagline' => 'Form, weight, temperature',
-                'description' => 'Sculpted from body-safe silicone, borosilicate glass, and solid alloy.',
+                'description' => 'Vibrators, wands and personal massagers.',
                 'position' => 10,
             ],
             'Silk' => [
                 'slug' => 'silk',
                 'name' => 'Silk',
                 'tagline' => 'The first thing to touch skin',
-                'description' => 'Delicate accessories, tactile pouches, and intimate apparel.',
+                'description' => 'Pouches, chargers and accessories.',
                 'position' => 20,
             ],
             'Rituals' => [
                 'slug' => 'rituals',
                 'name' => 'Rituals',
-                'tagline' => 'Oils, balms, time',
-                'description' => 'Gentle cleansing formulas, restorative glides, and care essentials.',
+                'tagline' => 'Before and after',
+                'description' => 'Cleaning and care essentials.',
                 'position' => 30,
             ],
             'Sensations' => [
                 'slug' => 'sensations',
                 'name' => 'Sensations',
                 'tagline' => 'Tension, texture, release',
-                'description' => 'Targeted stimulation, ergonomic rings, and deep male pleasure toys.',
+                'description' => 'Strokers, sleeves, rings and prostate massagers.',
                 'position' => 40,
             ],
             'Intimacy' => [
                 'slug' => 'intimacy',
                 'name' => 'Intimacy',
                 'tagline' => 'App-connected play, shared curiosity',
-                'description' => 'Bluetooth-enabled devices, couple kits, and customizable keepsakes.',
+                'description' => 'App-connected and couples’ toys.',
                 'position' => 50,
             ],
         ];
@@ -388,60 +388,22 @@ class ImportProductsCommand extends Command
         $text = strtolower($materialsRaw . ' ' . $title . ' ' . $desc);
         $list = [];
 
-        if (str_contains($text, 'silicone')) $list[] = 'Medical-Grade Silicone';
-        if (str_contains($text, 'abs')) $list[] = 'ABS Polymer (Phthalate-free)';
+        if (str_contains($text, 'silicone')) $list[] = 'Silicone';
+        if (str_contains($text, 'abs')) $list[] = 'ABS plastic';
         if (str_contains($text, 'glass') || str_contains($text, 'borosilicate')) $list[] = 'Borosilicate Glass';
         if (str_contains($text, 'steel') || str_contains($text, 'metal') || str_contains($text, 'zinc')) $list[] = 'Solid Zinc / Stainless Alloy';
         if (str_contains($text, 'leather')) $list[] = 'Genuine Supple Leather';
         if (str_contains($text, 'cotton') || str_contains($text, 'textile') || str_contains($text, 'canvas')) $list[] = 'Organic Cotton Canvas';
 
-        if (empty($list)) {
-            $list = ['Medical-Grade Silicone', 'ABS Polymer (Phthalate-free)'];
-        }
-
         return array_values(array_unique($list));
     }
 
-    protected function generateStory(string $title, array $materials, string $category): string
+
+    /** «Default Title» — служебное имя Shopify для единственного варианта. */
+    protected function variantName(?string $title): string
     {
-        $materialStr = implode(' and ', array_slice($materials, 0, 2));
-        return "Crafted from velvety {$materialStr}. Designed with quiet sophistication, subtle contours, and seamless ergonomics for effortless private enjoyment.";
-    }
+        $title = trim((string) $title);
 
-    protected function generateSensory(array $materials, string $title, string $category): array
-    {
-        $lower = strtolower($title . ' ' . implode(' ', $materials));
-
-        $firmness = 3;
-        $texture = 'silk';
-        $weight = 3;
-        $noise = 1;
-        $temperature = 'body-warm';
-        $waterproof = true;
-
-        if (str_contains($lower, 'cable') || str_contains($lower, 'cleaner') || str_contains($lower, 'bag') || str_contains($lower, 'socks') || str_contains($lower, 'cap')) {
-            $firmness = 1;
-            $noise = 1;
-            $waterproof = false;
-        } elseif (str_contains($lower, 'wand') || str_contains($lower, 'thrusting') || str_contains($lower, 'rabbit')) {
-            $firmness = 3;
-            $noise = 2;
-            $weight = 4;
-        } elseif (str_contains($lower, 'glass') || str_contains($lower, 'steel')) {
-            $firmness = 5;
-            $texture = 'polished';
-            $temperature = 'holds-cool';
-            $weight = 4;
-        }
-
-        return [
-            'firmness' => $firmness,
-            'texture' => $texture,
-            'weight' => $weight,
-            'noise' => $noise,
-            'temperature' => $temperature,
-            'waterproof' => $waterproof,
-            'lube_safe' => !str_contains($lower, 'silicone'),
-        ];
+        return ($title === '' || strcasecmp($title, 'Default Title') === 0) ? 'Standard' : $title;
     }
 }

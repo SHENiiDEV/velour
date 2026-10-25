@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { useCompany } from '@/hooks/use-company';
+import { LEGAL_LINKS } from './LegalPage';
 import CompanyDetails from './CompanyDetails';
 import DiscreetToggle from './DiscreetToggle';
 import QuickExit from './QuickExit';
@@ -9,7 +10,7 @@ export default function Footer() {
 
     return (
         <footer className="px-[5vw] pb-safe pt-20 sm:px-[6vw] sm:pt-24 sm:pb-16 border-t border-ivory/10 bg-void/50">
-            <div className="grid gap-10 font-sans text-xs sm:text-sm font-light text-mute md:grid-cols-4">
+            <div className="grid gap-10 font-sans text-sm font-normal text-mute md:grid-cols-4">
                 {/* Brand Philosophy */}
                 <div className="space-y-3 sm:col-span-1 md:col-span-2">
                     <p className="font-display text-2xl text-ivory tracking-widest uppercase">
@@ -47,7 +48,7 @@ export default function Footer() {
                         </li>
                         <li>
                             <Link href="/cart" className="transition-colors hover:text-ivory">
-                                Private Archive (Cart)
+                                Bag
                             </Link>
                         </li>
                     </ul>
@@ -56,19 +57,16 @@ export default function Footer() {
                 {/* Legal & Standards */}
                 <div className="space-y-3">
                     <p className="font-sans text-[11px] font-medium tracking-[0.2em] text-gold-2 uppercase">
-                        Covenant
+                        Help &amp; legal
                     </p>
                     <ul className="space-y-2.5">
-                        <li>
-                            <Link href="/privacy" className="transition-colors hover:text-ivory">
-                                Discretion Manifesto (Privacy)
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="/terms" className="transition-colors hover:text-ivory">
-                                Terms of Engagement
-                            </Link>
-                        </li>
+                        {LEGAL_LINKS.map((l) => (
+                            <li key={l.href}>
+                                <Link href={l.href} className="transition-colors hover:text-ivory">
+                                    {l.label}
+                                </Link>
+                            </li>
+                        ))}
                         <li>
                             <a href={`mailto:${company.email}`} className="transition-colors hover:text-ivory">
                                 {company.email}
@@ -109,9 +107,9 @@ export default function Footer() {
                 </div>
             </div>
 
-            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between border-t border-ivory/5 pt-6 text-[11px] text-mute/60">
+            <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-t border-ivory/5 pt-6 text-[13px] text-mute">
                 <p>© {new Date().getFullYear()} {company.name}. All rights reserved.</p>
-                <CompanyDetails className="mt-2 sm:mt-0 text-center sm:text-right" />
+                <CompanyDetails className="sm:text-right" />
             </div>
         </footer>
     );

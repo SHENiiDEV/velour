@@ -2,6 +2,7 @@ import { Link, router } from '@inertiajs/react';
 import QtyStepper from '@/components/velour/QtyStepper';
 import Veil from '@/components/velour/Veil';
 import VelourLayout from '@/layouts/velour-layout';
+import { variantLabel } from '@/lib/velour';
 import CartSummary from '@/components/velour/CartSummary';
 import { money } from '@/lib/money';
 import type { CartProps } from '@/types/catalog';
@@ -17,7 +18,7 @@ export default function CartIndex({ cart }: CartIndexProps) {
     const remove = (id: number) => router.delete(`/cart/${id}`, { preserveScroll: true });
 
     return (
-        <VelourLayout title="Your Selection — VELOUR">
+        <VelourLayout title="Your bag — VELOUR">
             <section className="relative min-h-[75vh] px-[5vw] pb-36 pt-28 sm:px-[6vw] sm:pb-32 sm:pt-40">
                 {/* Ambient background glows */}
                 <div className="pointer-events-none absolute left-1/4 top-20 h-96 w-96 rounded-full bg-wine/15 blur-[120px]" />
@@ -27,30 +28,24 @@ export default function CartIndex({ cart }: CartIndexProps) {
                     {/* Header */}
                     <div className="flex flex-col gap-3 border-b border-ivory/10 pb-6 md:flex-row md:items-end md:justify-between sm:pb-8">
                         <div>
-                            <span className="font-sans text-xs font-light tracking-[0.25em] text-gold-2 uppercase">
-                                Private Archive
-                            </span>
-                            <h1 className="mt-1 font-display text-4xl font-light text-ivory sm:text-5xl md:text-6xl">
-                                Your Selection
+                            <h1 className="font-display text-4xl font-light text-ivory sm:text-5xl md:text-6xl">
+                                Your bag
                             </h1>
                         </div>
                         {!empty && (
                             <p className="font-sans text-xs font-light text-mute sm:text-sm">
-                                {cart.items.reduce((acc, it) => acc + it.qty, 0)} {cart.items.reduce((acc, it) => acc + it.qty, 0) === 1 ? 'creation' : 'creations'} reserved in your session
+                                {cart.items.reduce((acc, it) => acc + it.qty, 0)} {cart.items.reduce((acc, it) => acc + it.qty, 0) === 1 ? 'item' : 'items'}
                             </p>
                         )}
                     </div>
 
                     {empty ? (
                         <div className="mt-16 max-w-xl py-12 text-center sm:text-left">
-                            <div className="inline-block rounded-full border border-gold/30 bg-gold/5 px-4 py-1.5 font-sans text-xs font-light text-gold-2">
-                                Clean Slate
-                            </div>
-                            <p className="mt-6 font-display text-3xl font-light leading-snug text-ivory/90 sm:text-4xl md:text-5xl">
-                                Your casket is currently silent.
+                            <p className="font-display text-3xl font-light leading-snug text-ivory/90 sm:text-4xl md:text-5xl">
+                                Your bag is empty.
                             </p>
-                            <p className="mt-4 font-sans text-sm font-light leading-relaxed text-mute sm:text-base">
-                                No choices have been committed yet. Explore our curated library of tactile forms, intimacy objects, and botanical elixirs.
+                            <p className="mt-4 font-sans text-sm leading-relaxed text-mute sm:text-base">
+                                Nothing chosen yet. The collection is a quiet place to start.
                             </p>
                             <div className="mt-8">
                                 <Link
@@ -97,10 +92,14 @@ export default function CartIndex({ cart }: CartIndexProps) {
                                                         </p>
                                                     </div>
                                                     <div className="mt-1 flex flex-wrap items-center gap-1.5 font-sans text-xs font-light text-mute">
-                                                        <span className="rounded bg-ivory/5 px-1.5 py-0.5 text-ivory/80">
-                                                            {item.variant.name}
-                                                        </span>
-                                                        <span>•</span>
+                                                        {variantLabel(item.variant.name) && (
+                                                            <>
+                                                                <span className="rounded bg-ivory/5 px-1.5 py-0.5 text-ivory/80">
+                                                                    {variantLabel(item.variant.name)}
+                                                                </span>
+                                                                <span>•</span>
+                                                            </>
+                                                        )}
                                                         <span>{money(item.unitPriceCents, cart.currency)} each</span>
                                                     </div>
                                                 </div>
@@ -155,10 +154,10 @@ export default function CartIndex({ cart }: CartIndexProps) {
                                         </div>
                                         <div className="space-y-1">
                                             <p className="font-sans text-xs font-medium text-gold-2 uppercase tracking-wider">
-                                                03. Pure Materials
+                                                03. Easy returns
                                             </p>
                                             <p className="font-sans text-xs font-light leading-relaxed text-mute">
-                                                100% body-safe medical silicone, borosilicate glass, and non-porous alloys.
+                                                Sealed items within 14 days, 2-year legal guarantee. <a href="/returns" className="underline underline-offset-4 hover:text-ivory">Details</a>
                                             </p>
                                         </div>
                                     </div>
@@ -180,7 +179,7 @@ export default function CartIndex({ cart }: CartIndexProps) {
 
                                     <div className="rounded-sm border border-ivory/5 bg-void/20 p-4 text-center">
                                         <p className="font-sans text-xs font-light leading-relaxed text-mute">
-                                            🔒 SSL 256-Bit Encrypted Checkout. No account creation required.
+                                            No account needed.
                                         </p>
                                     </div>
                                 </div>

@@ -2,6 +2,7 @@ import { Link, useForm } from '@inertiajs/react';
 import Field from '@/components/velour/Field';
 import Veil from '@/components/velour/Veil';
 import VelourLayout from '@/layouts/velour-layout';
+import { useShop, variantLabel } from '@/lib/velour';
 import CartSummary from '@/components/velour/CartSummary';
 import { money } from '@/lib/money';
 import type { CartProps } from '@/types/catalog';
@@ -11,7 +12,22 @@ interface CheckoutProps {
     privacy: { discreetPackagingDefault: boolean; statementDescriptor: string };
 }
 
+/** Подсказка формата индекса для выбранной страны (В9). */
+const POSTCODE_HINTS: Record<string, string> = {
+    LV: 'LV-1010',
+    LT: 'LT-01100',
+    EE: '10111',
+    FI: '00100',
+    PL: '00-001',
+    DE: '10115',
+    FR: '75001',
+    NL: '1012 AB',
+    SE: '111 22',
+};
+
 export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
+    const shop = useShop();
+    const countries = Object.entries(shop.countries);
     const form = useForm({
         email: '',
         phone: '',
@@ -21,12 +37,12 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
             line2: '',
             city: '',
             postcode: '',
-            country: 'LV',
+            country: countries[0]?.[0] ?? 'LV',
         },
         notes: '',
         discreet_packaging: privacy.discreetPackagingDefault,
-        age_confirmed: false,
-        terms_accepted: false,
+        age_confirmed: false as boolean,
+        terms_accepted: false as boolean,
     });
 
     const err = (key: string) => (form.errors as Record<string, string | undefined>)[key];
@@ -59,7 +75,8 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                         </p>
                     </div>
 
-                    <form onSubmit={submit} className="mt-8 grid gap-8 sm:gap-12 lg:mt-12 lg:grid-cols-[1fr_420px] xl:gap-16">
+                    {/* noValidate: сообщения об ошибках — наши и на английском, а не на языке браузера (М4). */}
+                    <form onSubmit={submit} noValidate className="mt-8 grid gap-8 sm:gap-12 lg:mt-12 lg:grid-cols-[1fr_420px] xl:gap-16">
                         {/* Main Checkout Form Steps */}
                         <div className="space-y-8 sm:space-y-12">
                             {/* Step 1: Contact Information */}
@@ -154,44 +171,36 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                                         label="Postal Code"
                                         name="postcode"
                                         autoComplete="postal-code"
-                                        placeholder="LV-1010"
+                                        placeholder={POSTCODE_HINTS[form.data.shipping_address.country] ?? ''}
                                         value={form.data.shipping_address.postcode}
                                         onChange={(e) => addr('postcode', e.target.value)}
                                         error={err('shipping_address.postcode')}
                                         required
                                     />
                                     <div className="sm:col-span-2">
-                                        <label className="block">
-                                            <span className="font-sans text-xs font-light tracking-wide text-mute">
-                                                Country (ISO 2-letter code)
+                                        <label className="block" htmlFor="country">
+                                            <span className="font-sans text-xs tracking-wide text-mute">Country</span>
+                                            {/* Только страны, куда реально есть доставка (config/velour.php → shipping.countries) */}
+                                            <select
+                                                id="country"
+                                                autoComplete="country"
+                                                value={form.data.shipping_address.country}
+                                                onChange={(e) => addr('country', e.target.value)}
+                                                className="mt-2 w-full border-0 border-b border-ivory/20 bg-transparent px-0 py-2 font-sans text-base text-ivory outline-none focus:border-gold"
+                                                required
+                                            >
+                                                {countries.map(([code, c]) => (
+                                                    <option key={code} value={code} className="bg-surface text-ivory">
+                                                        {c.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <span className="mt-1 block font-sans text-xs text-mute">
+                                                {shop.countries[form.data.shipping_address.country]?.transit} after dispatch ·{' '}
+                                                <Link href="/delivery" target="_blank" className="underline underline-offset-4 hover:text-ivory">
+                                                    Delivery
+                                                </Link>
                                             </span>
-                                            <div className="mt-2 flex flex-wrap items-center gap-3">
-                                                <input
-                                                    type="text"
-                                                    maxLength={2}
-                                                    autoComplete="country"
-                                                    value={form.data.shipping_address.country}
-                                                    onChange={(e) => addr('country', e.target.value.toUpperCase())}
-                                                    className="w-20 border-0 border-b border-ivory/20 bg-transparent px-0 py-2 font-display text-xl uppercase text-ivory outline-none focus:border-gold"
-                                                    required
-                                                />
-                                                <div className="flex flex-wrap gap-1.5 text-xs">
-                                                    {['LV', 'LT', 'EE', 'DE', 'FR', 'GB', 'US'].map((code) => (
-                                                        <button
-                                                            key={code}
-                                                            type="button"
-                                                            onClick={() => addr('country', code)}
-                                                            className={`rounded px-2.5 py-1 font-sans text-xs transition-colors ${
-                                                                form.data.shipping_address.country === code
-                                                                    ? 'bg-gold text-void font-medium'
-                                                                    : 'bg-ivory/5 text-mute hover:text-ivory'
-                                                            }`}
-                                                        >
-                                                            {code}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
                                             {err('shipping_address.country') && (
                                                 <span className="mt-1 block font-sans text-xs text-rose">
                                                     {err('shipping_address.country')}
@@ -220,7 +229,7 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                                     <div className="pt-2">
                                         <label className="block">
                                             <span className="font-sans text-xs font-light tracking-wide text-mute">
-                                                Special Delivery Instructions for the Courier (Optional)
+                                                Notes for the courier (optional)
                                             </span>
                                             <textarea
                                                 rows={2}
@@ -245,23 +254,27 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                                     <LuxuryCheck
                                         checked={form.data.age_confirmed}
                                         onChange={(v) => form.setData('age_confirmed', v)}
-                                        title="I affirm that I am 18 years of age or older"
+                                        title="I am 18 or older *"
                                         text="All objects in this collection are strictly designated for consenting adults of legal age."
                                         error={err('age_confirmed')}
                                     />
                                     <LuxuryCheck
                                         checked={form.data.terms_accepted}
                                         onChange={(v) => form.setData('terms_accepted', v)}
-                                        title="I accept the Terms & Discretion Manifesto"
+                                        title="I accept the Terms of sale *"
                                         text={
                                             <span>
                                                 I agree to the{' '}
                                                 <Link href="/terms" target="_blank" className="text-gold-2 underline underline-offset-4 hover:text-ivory">
-                                                    Terms
+                                                    Terms of sale
+                                                </Link>{' '}
+                                                and have read the{' '}
+                                                <Link href="/privacy" target="_blank" className="text-gold-2 underline underline-offset-4 hover:text-ivory">
+                                                    Privacy policy
                                                 </Link>{' '}
                                                 and{' '}
-                                                <Link href="/privacy" target="_blank" className="text-gold-2 underline underline-offset-4 hover:text-ivory">
-                                                    Discretion Manifesto
+                                                <Link href="/returns" target="_blank" className="text-gold-2 underline underline-offset-4 hover:text-ivory">
+                                                    Returns &amp; withdrawal
                                                 </Link>
                                                 .
                                             </span>
@@ -318,7 +331,7 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                                                     {it.product.name}
                                                 </p>
                                                 <p className="font-sans text-xs font-light text-mute">
-                                                    {it.variant.name} × {it.qty}
+                                                    {[variantLabel(it.variant.name), `× ${it.qty}`].filter(Boolean).join(' ')}
                                                 </p>
                                             </div>
                                             <p className="font-display text-sm text-gold-2 font-normal">

@@ -25,7 +25,7 @@ export default function CartSummary({ cart, className = '', showFreeShippingProg
 
             <dl className="mt-6 space-y-3.5 font-sans text-sm font-light">
                 <div className="flex justify-between text-mute">
-                    <dt>Selection Subtotal</dt>
+                    <dt>Subtotal</dt>
                     <dd className="text-ivory font-medium">{money(cart.subtotalCents, cart.currency)}</dd>
                 </div>
                 <div className="flex justify-between text-mute">

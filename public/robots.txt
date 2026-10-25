@@ -1,2 +1,6 @@
 User-agent: *
-Disallow:
+Disallow: /cart
+Disallow: /checkout
+Disallow: /order/
+Disallow: /dashboard
+Disallow: /settings

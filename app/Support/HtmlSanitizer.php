@@ -37,7 +37,7 @@ class HtmlSanitizer
         'button', 'select', 'textarea', 'noscript', 'template',
     ];
 
-    public static function clean(?string $html): ?string
+    public static function clean(?string $html, bool $allowLinks = true): ?string
     {
         if ($html === null || trim($html) === '') {
             return null;
@@ -67,7 +67,7 @@ class HtmlSanitizer
             return self::fromPlainText(strip_tags($html));
         }
 
-        self::walk($root, $doc);
+        self::walk($root, $doc, $allowLinks);
         self::removeEmpty($root);
 
         $out = '';
@@ -83,7 +83,7 @@ class HtmlSanitizer
         return $out === '' ? null : $out;
     }
 
-    protected static function walk(DOMNode $node, DOMDocument $doc): void
+    protected static function walk(DOMNode $node, DOMDocument $doc, bool $allowLinks = true): void
     {
         foreach (iterator_to_array($node->childNodes) as $child) {
             if ($child instanceof DOMText) {
@@ -104,7 +104,7 @@ class HtmlSanitizer
             }
 
             // Сначала чистим потомков — затем решаем судьбу самого узла.
-            self::walk($child, $doc);
+            self::walk($child, $doc, $allowLinks);
 
             if (! isset(self::ALLOWED[$tag])) {
                 self::unwrap($child);
@@ -112,7 +112,7 @@ class HtmlSanitizer
             }
 
             $target = self::ALLOWED[$tag];
-            $href = $tag === 'a' ? self::safeHref($child->getAttribute('href')) : null;
+            $href = $tag === 'a' && $allowLinks ? self::safeHref($child->getAttribute('href')) : null;
 
             if ($tag === 'a' && $href === null) {
                 self::unwrap($child);

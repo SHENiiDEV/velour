@@ -1,5 +1,5 @@
-import { usePage } from '@inertiajs/react';
-import type { SharedProps } from '@/types/velour';
+import { router, usePage } from '@inertiajs/react';
+import type { SharedProps, ShopProps } from '@/types/velour';
 
 /**
  * Палитра для шейдера — те же значения, что в resources/css/app.css (@theme).
@@ -37,8 +37,55 @@ export function usePrivacy() {
     );
 }
 
+const SHOP_FALLBACK: ShopProps = {
+    currency: 'EUR',
+    shippingFlatCents: 590,
+    freeShippingFromCents: 9000,
+    vatNote: 'incl. VAT',
+    dispatchDays: '1–2',
+    countries: {},
+};
+
+/** Условия доставки и пометка НДС из shared props. */
+export function useShop(): ShopProps {
+    return useShared().shop ?? SHOP_FALLBACK;
+}
+
+/** Имя варианта для покупателя: служебные «Default Title»/«Standard» не показываем (М2). */
+export function variantLabel(name: string | null | undefined): string | null {
+    if (!name) return null;
+    return /^(default title|standard)$/i.test(name.trim()) ? null : name;
+}
+
 export function prefersReducedMotion(): boolean {
     return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/** Нейтральный заголовок вкладки в скрытном режиме — без названия магазина. */
+export const DISCREET_TITLE = 'Untitled';
+
+/**
+ * В скрытном режиме каждый внутренний переход заменяет запись истории (replace),
+ * а не добавляет новую: после «Quick exit» кнопка «Назад» уводит максимум
+ * на одну страницу магазина, а не на всю цепочку просмотренных.
+ */
+let discreetNow = false;
+
+export function installDiscreetHistory() {
+    router.on('navigate', (event) => {
+        const props = event.detail.page.props as { privacy?: { discreet?: boolean } };
+        discreetNow = Boolean(props.privacy?.discreet);
+    });
+    router.on('before', (event) => {
+        if (discreetNow && event.detail.visit.method === 'get') {
+            event.detail.visit.replace = true;
+        }
+    });
+}
+
+/** Layout сообщает текущее состояние (на случай первой загрузки до события navigate). */
+export function syncDiscreet(value: boolean) {
+    discreetNow = value;
 }
 
 /** Быстрый выход: заменяем текущую запись истории, чтобы «назад» не вёл на VELOUR. */

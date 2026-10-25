@@ -1,3 +1,4 @@
+import { route } from '@/lib/route';
 import InputError from '@/components/input-error';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';

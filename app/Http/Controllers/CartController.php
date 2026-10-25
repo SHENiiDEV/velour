@@ -32,7 +32,7 @@ class CartController extends Controller
 
         $this->carts->add($variant, $request->integer('qty', 1) ?: 1);
 
-        return back()->with('status', 'Added to your cart.');
+        return back()->with('status', 'Added to your bag.');
     }
 
     public function update(UpdateCartItemRequest $request, CartItem $item): RedirectResponse

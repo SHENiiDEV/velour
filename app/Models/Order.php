@@ -49,17 +49,20 @@ class Order extends Model
     }
 
     /**
-     * VLR-2026-000123 — без намёка на содержимое, годится и для наклейки на коробке.
-     * Счётчик не атомарен, поэтому при гонке двух заказов просто берём следующий
-     * свободный номер (уникальный индекс в БД — последняя линия обороны).
+     * VLR-7K3Q9P — без намёка на содержимое и без последовательного счётчика:
+     * по номеру нельзя оценить объём продаж (аудит, М11). Алфавит без 0/O/1/I/L,
+     * чтобы номер легко продиктовать. Уникальный индекс в БД — последняя линия обороны.
      */
     public static function nextNumber(): string
     {
-        $year = now()->year;
-        $seq = static::whereYear('created_at', $year)->count() + 1;
+        $alphabet = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 
         do {
-            $number = sprintf('VLR-%d-%06d', $year, $seq++);
+            $code = '';
+            for ($i = 0; $i < 6; $i++) {
+                $code .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+            }
+            $number = "VLR-{$code}";
         } while (static::where('number', $number)->exists());
 
         return $number;

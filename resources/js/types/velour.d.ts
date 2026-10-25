@@ -18,6 +18,19 @@ export interface CompanyProps {
     address: string;
     reg_number: string;
     email: string;
+    phone: string;
+    vat_number: string;
+    returns_address: string;
+}
+
+export interface ShopProps {
+    currency: string;
+    shippingFlatCents: number;
+    freeShippingFromCents: number;
+    /** «incl. VAT» или пусто. */
+    vatNote: string | null;
+    dispatchDays: string;
+    countries: Record<string, { name: string; transit: string }>;
 }
 
 /** Shared props из HandleInertiaRequests::share(). */
@@ -26,6 +39,8 @@ export interface SharedProps {
     auth: { user: AuthUser | null };
     privacy: PrivacyProps;
     company: CompanyProps;
+    shop: ShopProps;
+    navCategories?: Array<{ slug: string; name: string }>;
     flash: { status: string | null };
     cartCount: number;
     [key: string]: unknown;

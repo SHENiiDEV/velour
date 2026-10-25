@@ -98,7 +98,7 @@ it('does not sell more than is in stock', function () {
 
     $this->post('/checkout', [
         'email' => 'guest@example.com',
-        'shipping_address' => ['name' => 'G', 'line1' => 'X', 'city' => 'Rīga', 'postcode' => '1010', 'country' => 'LV'],
+        'shipping_address' => ['name' => 'Guest', 'line1' => 'Brīvības 1', 'city' => 'Rīga', 'postcode' => '1010', 'country' => 'LV'],
         'age_confirmed' => true,
         'terms_accepted' => true,
     ])->assertSessionHasErrors('cart');
@@ -149,4 +149,15 @@ it('allows the customer to download their dark PDF invoice', function () {
 
     $response->assertOk();
     $response->assertHeader('content-type', 'application/pdf');
+});
+
+it('rejects obviously wrong address data with readable messages', function () {
+    [, $response] = placeOrder($this, [
+        'phone' => 'abc',
+        'shipping_address' => ['name' => 'Guest', 'line1' => 'Brīvības 1', 'city' => 'Rīga', 'postcode' => '!!!', 'country' => 'XX'],
+    ]);
+
+    $response->assertSessionHasErrors(['phone', 'shipping_address.postcode', 'shipping_address.country']);
+    expect(session('errors')->first('shipping_address.country'))->toBe('We do not deliver to this country yet.');
+    expect(Order::count())->toBe(0);
 });

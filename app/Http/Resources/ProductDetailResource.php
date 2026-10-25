@@ -32,7 +32,7 @@ class ProductDetailResource extends JsonResource
             'name' => $this->name,
             'tagline' => $this->tagline,
             // Описания из Woo/импорта — сырой HTML; отдаём только безопасный белый список тегов.
-            'description' => HtmlSanitizer::clean($this->description),
+            'description' => HtmlSanitizer::clean($this->description, allowLinks: false),
             'story' => $this->story,
             'care' => $this->care,
             'materials' => $this->materials ?? [],

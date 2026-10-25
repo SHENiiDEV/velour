@@ -7,7 +7,6 @@ interface FiltersProps {
     filters: FilterDefinition[];
     active: ActiveMap;
     baseUrl: string;
-    onApply?: () => void;
 }
 
 function toArray(v: string | string[] | undefined): string[] {
@@ -19,7 +18,7 @@ function toArray(v: string | string[] | undefined): string[] {
  * Фильтры по ощущениям и материалам.
  * Удобные touch-таргеты, мгновенное или пакетное применение.
  */
-export default function Filters({ filters, active, baseUrl, onApply }: FiltersProps) {
+export default function Filters({ filters, active, baseUrl }: FiltersProps) {
     const apply = (next: ActiveMap) => {
         const clean: Record<string, string | string[]> = {};
         for (const [k, v] of Object.entries(next)) {
@@ -30,8 +29,8 @@ export default function Filters({ filters, active, baseUrl, onApply }: FiltersPr
             preserveState: true,
             preserveScroll: true,
             replace: true,
-            only: ['products', 'active'],
-            onSuccess: () => onApply?.(),
+            // Панель не закрываем — можно выбрать несколько значений подряд (М5).
+            only: ['products', 'active', 'filters'],
         });
     };
 
@@ -58,8 +57,9 @@ export default function Filters({ filters, active, baseUrl, onApply }: FiltersPr
                         {f.type === 'scale' && f.scale && (
                             <div className="mt-3 flex flex-wrap items-center gap-3">
                                 <div className="flex items-center gap-2">
-                                    {Array.from({ length: f.scale.max - f.scale.min + 1 }, (_, i) => {
-                                        const v = String(i + f.scale!.min);
+                                    {Array.from({ length: f.scale.max - f.scale.min + 1 }, (_, i) => String(i + f.scale!.min))
+                                        .filter((v) => (f.counts[v] ?? 0) > 0 || selected.includes(v))
+                                        .map((v) => {
                                         const isOn = selected.includes(v);
                                         return (
                                             <button
@@ -72,8 +72,8 @@ export default function Filters({ filters, active, baseUrl, onApply }: FiltersPr
                                                 }`}
                                                 onClick={() => toggleValue(f.key, v)}
                                                 aria-pressed={isOn}
-                                                aria-label={`${f.label}: ${f.scale!.labels[v] ?? v}`}
-                                                title={f.scale!.labels[v] ?? v}
+                                                aria-label={`${f.label}: ${f.scale!.labels[v] ?? v} (${f.counts[v] ?? 0})`}
+                                                title={`${f.scale!.labels[v] ?? v} · ${f.counts[v] ?? 0}`}
                                             >
                                                 <span className="font-display text-sm">{v}</span>
                                             </button>
@@ -91,7 +91,7 @@ export default function Filters({ filters, active, baseUrl, onApply }: FiltersPr
                         {/* Enum options (materials, textures, etc.) */}
                         {f.type === 'enum' && f.options && (
                             <div className="mt-3 flex flex-wrap gap-2">
-                                {f.options.map((o) => {
+                                {f.options.filter((o) => (f.counts[o.value] ?? 0) > 0 || selected.includes(o.value)).map((o) => {
                                     const isSelected = selected.includes(o.value);
                                     return (
                                         <button
@@ -105,7 +105,7 @@ export default function Filters({ filters, active, baseUrl, onApply }: FiltersPr
                                                     : 'border-ivory/15 bg-surface/30 text-mute hover:border-ivory/40 hover:text-ivory'
                                             }`}
                                         >
-                                            {o.label}
+                                            {o.label} <span className="text-mute/70">{f.counts[o.value] ?? 0}</span>
                                         </button>
                                     );
                                 })}
@@ -114,18 +114,26 @@ export default function Filters({ filters, active, baseUrl, onApply }: FiltersPr
 
                         {/* Boolean toggles */}
                         {f.type === 'bool' && (
-                            <button
-                                type="button"
-                                onClick={() => apply({ ...active, [f.key]: selected.includes('1') ? [] : ['1'] })}
-                                aria-pressed={selected.includes('1')}
-                                className={`mt-3 rounded-full border px-4 py-1.5 font-sans text-xs transition-all ${
-                                    selected.includes('1')
-                                        ? 'border-gold bg-gold/15 text-gold-2 font-medium'
-                                        : 'border-ivory/15 bg-surface/30 text-mute hover:border-ivory/40 hover:text-ivory'
-                                }`}
-                            >
-                                {selected.includes('1') ? '✓ Active only' : 'Show all'}
-                            </button>
+                            <div className="mt-3 flex gap-2">
+                                {(['1', '0'] as const).map((v) => {
+                                    const isOn = selected.includes(v);
+                                    return (
+                                        <button
+                                            key={v}
+                                            type="button"
+                                            onClick={() => toggleValue(f.key, v)}
+                                            aria-pressed={isOn}
+                                            className={`rounded-full border px-4 py-1.5 font-sans text-xs transition-all ${
+                                                isOn
+                                                    ? 'border-gold bg-gold/15 text-gold-2 font-medium'
+                                                    : 'border-ivory/15 bg-surface/30 text-mute hover:border-ivory/40 hover:text-ivory'
+                                            }`}
+                                        >
+                                            {v === '1' ? 'Yes' : 'No'} <span className="text-mute/70">{f.counts[v] ?? 0}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         )}
                     </div>
                 );
@@ -135,7 +143,7 @@ export default function Filters({ filters, active, baseUrl, onApply }: FiltersPr
                 <div className="pt-2">
                     <button
                         type="button"
-                        onClick={() => apply({ q: active.q, sort: active.sort })}
+                        onClick={() => apply({ q: active.q, sort: active.sort, available: active.available })}
                         className="font-sans text-xs font-medium text-rose underline-offset-4 hover:underline"
                     >
                         ✕ Clear all filters

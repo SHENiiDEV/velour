@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureAgeVerified;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,6 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: []);
+        // HSTS + CSP на всех ответах, включая страницы ошибок (М10).
+        $middleware->append(SecurityHeaders::class);
 
         $middleware->web(append: [
             HandleInertiaRequests::class,
@@ -33,7 +36,31 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
             if (in_array($response->getStatusCode(), [500, 503, 404, 403])) {
                 if ($request->header('X-Inertia') || ! app()->environment(['local', 'testing'])) {
+                    // На «не найденном» маршруте web-middleware не отрабатывает, и общих
+                    // props (company, privacy…) нет — без них layout падал в чёрный экран.
+                    $fallback = Inertia::getShared('company') === null ? [
+                        'name' => config('app.name'),
+                        'auth' => ['user' => null],
+                        'company' => config('velour.company'),
+                        'privacy' => [
+                            'discreet' => false,
+                            'ageVerified' => false,
+                            'exitUrl' => config('velour.exit_url'),
+                        ],
+                        'flash' => ['status' => null],
+                        'cartCount' => 0,
+                        'shop' => [
+                            'currency' => config('velour.currency'),
+                            'shippingFlatCents' => (int) config('velour.shipping.flat_cents'),
+                            'freeShippingFromCents' => (int) config('velour.shipping.free_from_cents'),
+                            'vatNote' => config('velour.vat_note'),
+                            'dispatchDays' => config('velour.shipping.dispatch_days'),
+                            'countries' => config('velour.shipping.countries'),
+                        ],
+                    ] : [];
+
                     return Inertia::render('error', [
+                        ...$fallback,
                         'status' => $response->getStatusCode(),
                     ])
                     ->toResponse($request)

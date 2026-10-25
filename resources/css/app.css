@@ -125,7 +125,7 @@
         scroll-behavior: smooth;
     }
     body {
-        @apply bg-void text-ivory font-sans font-light;
+        @apply bg-void text-ivory font-sans font-normal;
         text-rendering: optimizeLegibility;
     }
     ::selection {
@@ -169,9 +169,13 @@
         filter: blur(18px) saturate(0.6);
         transition: filter 0.5s var(--ease-cine);
     }
-    .discreet-veil:hover,
-    .discreet-veil:focus-within {
-        filter: blur(0) saturate(1);
+    /* Раскрытие по наведению — только там, где есть настоящий hover (мышь).
+       На сенсорных экранах :hover «залипает» после касания — там раскрывает JS (Veil). */
+    @media (hover: hover) {
+        .discreet-veil:hover,
+        .discreet-veil:focus-within {
+            filter: blur(0) saturate(1);
+        }
     }
 
     .hairline {
@@ -423,17 +427,8 @@
         transition: none !important;
     }
 
-    /* Курсор: кольцо с инерцией и точка внутри */
-    .has-cursor,
-    .has-cursor * {
-        cursor: none;
-    }
-    .has-cursor input,
-    .has-cursor textarea,
-    .has-cursor select,
-    .has-cursor [contenteditable='true'] {
-        cursor: auto;
-    }
+    /* Курсор: кольцо с инерцией и точка внутри — только украшение поверх системного.
+       Системный курсор не прячем: он нужен при экранной лупе и при подтормаживании (М6). */
     .v-cursor-ring,
     .v-cursor-dot {
         position: fixed;
@@ -651,3 +646,53 @@
 .velour-prose th { font-weight: 400; color: var(--color-ivory); text-transform: capitalize; }
 .velour-prose td:first-child strong { display: inline-block; text-transform: lowercase; }
 .velour-prose td:first-child strong::first-letter { text-transform: uppercase; }
+
+/* Юридические страницы: читаемый текст — 400, 16px, контраст ≥ 4.5:1 (М7). */
+.legal-body {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.75;
+    color: color-mix(in oklab, var(--color-ivory) 82%, var(--color-mute));
+}
+.legal-body > * + * { margin-top: 0.9em; }
+.legal-body strong { color: var(--color-ivory); font-weight: 500; }
+.legal-body a { color: var(--color-gold-2); text-decoration: underline; text-underline-offset: 3px; }
+.legal-body ul { list-style: disc; padding-left: 1.2em; }
+.legal-body ul li + li { margin-top: 0.35em; }
+.legal-body table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+.legal-body th, .legal-body td { text-align: left; vertical-align: top; padding: 0.6em 0.8em 0.6em 0; border-bottom: 1px solid color-mix(in oklab, var(--color-ivory) 12%, transparent); }
+.legal-body th { color: var(--color-ivory); font-weight: 500; }
+.legal-body pre {
+    white-space: pre-wrap;
+    font-family: var(--font-sans);
+    background: color-mix(in oklab, var(--color-surface) 80%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-ivory) 12%, transparent);
+    padding: 1.2em;
+    border-radius: 2px;
+}
+
+
+/* Фокус с клавиатуры — фирменным золотом, а не синей рамкой браузера (М6). */
+:focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+/* «Перейти к содержимому» — видна только при фокусе с клавиатуры. */
+.skip-link {
+    position: fixed;
+    left: 1rem;
+    top: -4rem;
+    z-index: 100;
+    padding: 0.75rem 1.25rem;
+    background: var(--color-gold);
+    color: var(--color-void);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 2px;
+    transition: top 0.2s;
+}
+.skip-link:focus { top: 1rem; }

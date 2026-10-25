@@ -6,6 +6,7 @@ use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DiscreetModeController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\JournalController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -37,12 +38,16 @@ Route::get('/checkout/{order:number}/success', [CheckoutController::class, 'succ
 Route::get('/order/{order:number}/invoice', [CheckoutController::class, 'invoice'])->name('order.invoice');
 
 // Редакция
-Route::get('/journal', fn () => Inertia::render('journal'))->name('journal');
+Route::get('/journal/{essay?}', JournalController::class)->name('journal');
 
 // Доступны без age-gate: юридические страницы, «Забота» и Страницы Ошибок
 Route::get('/care', fn () => Inertia::render('care'))->name('care');
 Route::get('/privacy', fn () => Inertia::render('legal/privacy'))->name('legal.privacy');
 Route::get('/terms', fn () => Inertia::render('legal/terms'))->name('legal.terms');
+Route::get('/delivery', fn () => Inertia::render('legal/delivery'))->name('legal.delivery');
+Route::get('/returns', fn () => Inertia::render('legal/returns'))->name('legal.returns');
+Route::get('/cookies', fn () => Inertia::render('legal/cookies'))->name('legal.cookies');
+Route::get('/legal-notice', fn () => Inertia::render('legal/legal-notice'))->name('legal.notice');
 
 // Превью страниц ошибок
 Route::get('/error/404', fn () => Inertia::render('error', ['status' => 404]))->name('error.404');

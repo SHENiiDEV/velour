@@ -1,40 +1,41 @@
 import { Link } from '@inertiajs/react';
 import VelourLayout from '@/layouts/velour-layout';
 
+// Только материалы, которые реально встречаются в каталоге (аудит, В7).
 const materials = [
     {
-        name: 'Medical-grade silicone',
-        text: 'Non-porous, hypoallergenic, holds body heat. Wash with warm water and soap; boiling is fine. Water-based lubricant only — silicone lube softens the surface.',
+        name: 'Silicone',
+        text: 'Non-porous and holds body heat. Wash with warm water and mild soap or a toy cleaner. Use water-based lubricant — silicone lube can soften a silicone surface.',
     },
     {
-        name: 'Borosilicate glass',
-        text: 'The same glass used in laboratory ware: unbothered by temperature swings and compatible with any lubricant. Perfectly smooth, easy to clean, keeps cold and warmth alike.',
+        name: 'ABS plastic',
+        text: 'The hard shell around motors and handles. Wipe clean; keep charging ports dry. Works with any lubricant.',
     },
     {
-        name: 'Stainless steel 316L',
-        text: 'Surgical alloy. Heavy, cool, permanent. Works with everything and can be boiled.',
+        name: 'TPE / TPR',
+        text: 'Very soft and stretchy — used in many sleeves. It is slightly porous: rinse with warm water after every use, let it dry completely, and store it on its own. Water-based lubricant only.',
     },
     {
-        name: 'Latex',
-        text: 'Natural rubber: airtight, stretchy, and unforgiving of oil — use only water-based lubricant on it. Rinse, dry flat, dust with cornstarch before storing. Not for anyone with a latex allergy, and we say so on every listing.',
+        name: 'Electronics',
+        text: 'Check the waterproof rating on each listing before rinsing under the tap. Charge with the supplied cable only, and never while the piece is wet.',
     },
     {
-        name: 'What we do not stock',
-        text: 'PVC, “jelly”, TPE/TPR of unknown origin, phthalates, fragrance in lubricants, glycerine. If a material is not named outright, we do not sell it.',
+        name: 'Not sure?',
+        text: 'Where the manufacturer states the material, we list it on the product page. If it is not there, write to us and we will find out before you buy.',
     },
 ];
 
 const questions: Array<[string, string]> = [
-    ['How do I choose a first one?', 'Softer and smaller than you think you need. Firmness 2–3 on our scale, weight up to “noticeable”. Everything else can come later.'],
+    ['How do I choose a first one?', 'Softer and smaller than you think you need, with a few gentle settings. Everything else can come later.'],
     ['Do I need lubricant?', 'Almost always. Water-based works with everything; silicone-based lasts longer but must never meet silicone objects.'],
-    ['How should I store things?', 'Dry, apart from each other, in a cloth pouch. Silicone should never rest against other silicone, and latex keeps best away from light and metal.'],
-    ['What if it is not right?', 'Unopened packaging, 14-day return, no questions. For hygiene reasons opened items cannot be returned, but write to us and we will help you find a replacement at a discount.'],
+    ['How should I store things?', 'Dry, apart from each other, in a cloth pouch. Soft materials keep best away from light and from each other.'],
+    ['What if it is not right?', 'Sealed items can be returned within 14 days, and every piece has a 2-year legal guarantee against defects. The full conditions are on the Returns page.'],
 ];
 
 /** Забота: честно о материалах и уходе. Доступна без подтверждения возраста — это образование, а не витрина. */
 export default function Care() {
     return (
-        <VelourLayout title="Care — VELOUR">
+        <VelourLayout title="Care" description="How to look after silicone, ABS and TPE pieces — cleaning, lubricants, storage and returns.">
             <section className="stagger px-[6vw] pb-16 pt-40">
                 <p className="font-sans text-sm font-light text-gold/90" style={{ '--i': 0 } as React.CSSProperties}>
                     Materials, care, straight answers
@@ -43,7 +44,7 @@ export default function Care() {
                     Care
                 </h1>
                 <p className="mt-8 max-w-xl font-display text-2xl font-light leading-snug text-ivory/80" style={{ '--i': 2 } as React.CSSProperties}>
-                    Your body is the one thing you are certain to have. We name our materials plainly and refuse to sell anything we would not trust ourselves.
+                    Your body is the one thing you are certain to have. Here is how to look after it, and after the things you share it with.
                 </p>
             </section>
 
@@ -68,9 +69,14 @@ export default function Care() {
                         </div>
                     ))}
                 </dl>
-                <Link href="/catalog" data-magnetic className="btn-gold mt-14 inline-block px-10 py-4 font-sans text-sm">
-                    To the collection
-                </Link>
+                <div className="mt-14 flex flex-wrap items-center gap-6">
+                    <Link href="/catalog" data-magnetic className="btn-gold inline-block px-10 py-4 font-sans text-sm">
+                        To the collection
+                    </Link>
+                    <Link href="/returns" className="font-sans text-sm text-ivory/80 underline underline-offset-4 hover:text-ivory">
+                        Returns &amp; guarantee
+                    </Link>
+                </div>
             </section>
         </VelourLayout>
     );

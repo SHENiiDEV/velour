@@ -6,7 +6,8 @@ import SensoryScale from '@/components/velour/SensoryScale';
 import Veil from '@/components/velour/Veil';
 import VelourLayout from '@/layouts/velour-layout';
 import { money } from '@/lib/money';
-import { usePrivacy } from '@/lib/velour';
+import { useCompany } from '@/hooks/use-company';
+import { usePrivacy, useShop } from '@/lib/velour';
 import type { ProductCard as ProductCardProps, ProductDetail } from '@/types/catalog';
 
 interface ProductShowProps {
@@ -16,6 +17,8 @@ interface ProductShowProps {
 
 export default function ProductShow({ product, related }: ProductShowProps) {
     const { discreet } = usePrivacy();
+    const shop = useShop();
+    const company = useCompany();
     const defaultVariant =
         product.variants.find((v) => v.isDefault && v.inStock) ??
         product.variants.find((v) => v.inStock) ??
@@ -27,7 +30,7 @@ export default function ProductShow({ product, related }: ProductShowProps) {
         [product.variants, variantId, defaultVariant]
     );
 
-    const [open, setOpen] = useState<'materials' | 'care' | null>('materials');
+    const [open, setOpen] = useState<'details' | 'materials' | 'care' | null>('details');
     const [activePhotoIndex, setActivePhotoIndex] = useState(0);
     const [showStickyBar, setShowStickyBar] = useState(false);
 
@@ -83,13 +86,13 @@ export default function ProductShow({ product, related }: ProductShowProps) {
     const allMedia = product.media.length > 0 ? product.media : [null];
 
     return (
-        <VelourLayout title={`${product.name} — VELOUR`}>
+        <VelourLayout title={product.name} description={product.tagline ?? undefined}>
             <div ref={heroSectionRef}>
-                <section className="grid gap-10 px-[5vw] pb-16 pt-28 sm:px-[6vw] sm:pb-24 sm:pt-36 lg:grid-cols-[1.15fr_1fr] lg:gap-20">
-                    {/* Media Gallery */}
-                    <div>
-                        {/* Mobile Swipeable Carousel (< lg) */}
-                        <div className="relative block lg:hidden">
+                <section className="grid grid-cols-1 gap-10 px-[5vw] pb-16 pt-28 sm:px-[6vw] sm:pb-24 sm:pt-36 md:grid-cols-[1.1fr_1fr] md:gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-20">
+                    {/* Media Gallery — min-w-0: иначе длинный контент распирал колонку шире экрана */}
+                    <div className="min-w-0">
+                        {/* Mobile Swipeable Carousel (< md) */}
+                        <div className="relative block md:hidden">
                             <div
                                 ref={mobileCarouselRef}
                                 onScroll={handleMobileScroll}
@@ -110,19 +113,23 @@ export default function ProductShow({ product, related }: ProductShowProps) {
                             {/* Mobile Pagination Counter & Dots */}
                             {allMedia.length > 1 && (
                                 <div className="mt-4 flex items-center justify-between px-2">
-                                    <div className="flex gap-1.5">
+                                    <div className="-ml-2 flex">
                                         {allMedia.map((_, i) => (
+                                            // Видимая точка маленькая, а область нажатия — 32×32.
                                             <button
                                                 key={i}
                                                 type="button"
                                                 onClick={() => scrollToPhoto(i)}
-                                                className={`h-1.5 rounded-full transition-all ${
-                                                    activePhotoIndex === i
-                                                        ? 'w-6 bg-gold'
-                                                        : 'w-1.5 bg-ivory/20'
-                                                }`}
-                                                aria-label={`Go to slide ${i + 1}`}
-                                            />
+                                                className="flex h-8 min-w-8 items-center justify-center"
+                                                aria-label={`Go to photo ${i + 1}`}
+                                                aria-current={activePhotoIndex === i || undefined}
+                                            >
+                                                <span
+                                                    className={`block h-1.5 rounded-full transition-all ${
+                                                        activePhotoIndex === i ? 'w-6 bg-gold' : 'w-1.5 bg-ivory/30'
+                                                    }`}
+                                                />
+                                            </button>
                                         ))}
                                     </div>
                                     <span className="font-sans text-xs font-light tracking-wider text-mute">
@@ -152,8 +159,8 @@ export default function ProductShow({ product, related }: ProductShowProps) {
                             )}
                         </div>
 
-                        {/* Desktop Multi-Image Grid (>= lg) */}
-                        <div ref={galleryRef} onPointerMove={onMove} className="cursor-glow hidden space-y-4 lg:block">
+                        {/* Desktop Multi-Image Grid (>= md) */}
+                        <div ref={galleryRef} onPointerMove={onMove} className="cursor-glow hidden space-y-4 md:block">
                             <Veil media={hero ?? null} ratio="4 / 5" priority sizes="55vw" />
                             {rest.length > 0 && (
                                 <div className="grid grid-cols-2 gap-4">
@@ -166,7 +173,7 @@ export default function ProductShow({ product, related }: ProductShowProps) {
                     </div>
 
                     {/* Product Info & Purchase Controls */}
-                    <div className="stagger lg:sticky lg:top-32 lg:self-start">
+                    <div className="stagger min-w-0 md:sticky md:top-28 md:self-start lg:top-32">
                         {/* Category & Brand Header */}
                         <p className="flex flex-wrap items-baseline gap-x-3 font-sans text-xs font-light uppercase tracking-wider text-gold/90 sm:text-sm" style={{ '--i': 0 } as React.CSSProperties}>
                             <Link href={`/catalog/${product.category.slug}`} className="thread text-gold-2 font-medium">
@@ -175,7 +182,7 @@ export default function ProductShow({ product, related }: ProductShowProps) {
                             {product.brand && <span className="text-mute">• {product.brand}</span>}
                         </p>
 
-                        <h1 className="mt-3 font-display text-4xl font-light leading-[0.95] text-ivory sm:text-6xl md:text-7xl" style={{ '--i': 1 } as React.CSSProperties}>
+                        <h1 className="mt-3 break-words font-display text-4xl font-light leading-[0.95] text-ivory sm:text-5xl lg:text-7xl" style={{ '--i': 1 } as React.CSSProperties}>
                             {product.name}
                         </h1>
 
@@ -186,13 +193,24 @@ export default function ProductShow({ product, related }: ProductShowProps) {
                         )}
 
                         {/* Price Display */}
-                        <div className="mt-6 flex items-baseline gap-4" style={{ '--i': 3 } as React.CSSProperties}>
-                            <span className="font-display text-3xl text-gold-2 font-normal sm:text-4xl">
-                                {money(variant?.priceCents ?? product.priceFromCents, product.currency)}
-                            </span>
-                            <span className="font-sans text-xs font-light text-mute">
-                                Discreet shipping included
-                            </span>
+                        <div className="mt-6" style={{ '--i': 3 } as React.CSSProperties}>
+                            <div className="flex items-baseline gap-3">
+                                <span className="font-display text-3xl text-gold-2 font-normal sm:text-4xl">
+                                    {money(variant?.priceCents ?? product.priceFromCents, product.currency)}
+                                </span>
+                                {shop.vatNote && <span className="font-sans text-xs text-mute">{shop.vatNote}</span>}
+                            </div>
+                            <p className="mt-2 font-sans text-xs text-mute">
+                                Free discreet delivery from {money(shop.freeShippingFromCents, product.currency)}, otherwise{' '}
+                                {money(shop.shippingFlatCents, product.currency)}.{' '}
+                                <Link href="/delivery" className="text-ivory/80 underline underline-offset-4 hover:text-ivory">
+                                    Delivery
+                                </Link>{' '}
+                                ·{' '}
+                                <Link href="/returns" className="text-ivory/80 underline underline-offset-4 hover:text-ivory">
+                                    Returns
+                                </Link>
+                            </p>
                         </div>
 
                         {/* Variant / Finish Selector */}
@@ -246,7 +264,7 @@ export default function ProductShow({ product, related }: ProductShowProps) {
                             >
                                 {variant?.inStock
                                     ? form.processing
-                                        ? 'Reserving…'
+                                        ? 'Adding…'
                                         : 'Add to Bag'
                                     : 'Restocking Soon'}
                             </button>
@@ -268,7 +286,12 @@ export default function ProductShow({ product, related }: ProductShowProps) {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="text-gold-2">✓</span>
-                                    <span>14-day hygiene &amp; craftsmanship guarantee</span>
+                                    <span>
+                                        14-day returns on sealed items · 2-year legal guarantee.{' '}
+                                        <Link href="/returns" className="underline underline-offset-4 hover:text-ivory">
+                                            Details
+                                        </Link>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -289,40 +312,44 @@ export default function ProductShow({ product, related }: ProductShowProps) {
 
                         {/* Material & Care Accordions */}
                         <div className="mt-10 border-t border-ivory/10" style={{ '--i': 8 } as React.CSSProperties}>
-                            <Disclosure
-                                title="Material & Body Safety"
-                                open={open === 'materials'}
-                                onToggle={() => setOpen(open === 'materials' ? null : 'materials')}
-                            >
-                                {product.materials.length > 0 ? (
-                                    <ul className="space-y-1 font-display text-xl text-ivory">
-                                        {product.materials.map((m) => (
-                                            <li key={m}>• {m}</li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p className="font-sans text-sm font-light text-mute">
-                                        Medical-Grade Silicone and Phthalate-free components.
-                                    </p>
-                                )}
-                                {product.isBodySafe && (
-                                    <p className="mt-3 font-sans text-xs font-light leading-relaxed text-gold-2/90">
-                                        ✓ 100% Body-safe: hypoallergenic, non-porous, laboratory-tested for skin contact.
-                                    </p>
-                                )}
-                                {product.description && (
+                            {product.description && (
+                                <Disclosure title="Details" open={open === 'details'} onToggle={() => setOpen(open === 'details' ? null : 'details')}>
                                     <div
-                                        className="velour-prose mt-4"
+                                        className="velour-prose"
                                         // HTML очищен на сервере (App\Support\HtmlSanitizer) — белый список тегов, без атрибутов.
                                         dangerouslySetInnerHTML={{ __html: product.description }}
                                     />
-                                )}
-                            </Disclosure>
-                            <Disclosure title="Care & Preservation" open={open === 'care'} onToggle={() => setOpen(open === 'care' ? null : 'care')}>
-                                <p className="font-sans text-sm font-light leading-relaxed text-mute">
-                                    {product.care ?? 'Clean thoroughly with warm water and mild soap before and after each use. Store away from direct sunlight.'}
+                                </Disclosure>
+                            )}
+                            {/* Материалы — только то, что указал производитель. Никаких выдуманных составов. */}
+                            {product.materials.length > 0 && (
+                                <Disclosure title="Materials" open={open === 'materials'} onToggle={() => setOpen(open === 'materials' ? null : 'materials')}>
+                                    <ul className="space-y-1 font-display text-xl text-ivory">
+                                        {product.materials.map((m) => (
+                                            <li key={m}>{m}</li>
+                                        ))}
+                                    </ul>
+                                    {product.isBodySafe && (
+                                        <p className="mt-3 font-sans text-xs leading-relaxed text-gold-2/90">
+                                            Body-safe materials, as documented by the manufacturer.
+                                        </p>
+                                    )}
+                                </Disclosure>
+                            )}
+                            {product.care && (
+                                <Disclosure title="Care" open={open === 'care'} onToggle={() => setOpen(open === 'care' ? null : 'care')}>
+                                    <p className="font-sans text-sm leading-relaxed text-mute">{product.care}</p>
+                                </Disclosure>
+                            )}
+                            {company.email && (
+                                <p className="pt-5 font-sans text-xs text-mute">
+                                    Questions about materials or sizing? Write to{' '}
+                                    <a href={`mailto:${company.email}`} className="text-ivory/80 underline underline-offset-4 hover:text-ivory">
+                                        {company.email}
+                                    </a>{' '}
+                                    — we answer plainly.
                                 </p>
-                            </Disclosure>
+                            )}
                         </div>
                     </div>
                 </section>
@@ -342,9 +369,9 @@ export default function ProductShow({ product, related }: ProductShowProps) {
             {related.data.length > 0 && (
                 <section className="px-[5vw] pb-24 sm:px-[6vw]">
                     <div className="flex items-center justify-between border-b border-ivory/10 pb-4">
-                        <h2 className="font-display text-3xl font-light text-ivory sm:text-4xl">Nearby Creations</h2>
-                        <Link href="/catalog" className="font-sans text-xs text-gold-2 hover:underline">
-                            View All →
+                        <h2 className="font-display text-3xl font-light text-ivory sm:text-4xl">You may also like</h2>
+                        <Link href={`/catalog/${product.category.slug}`} className="font-sans text-xs text-gold-2 hover:underline">
+                            View all
                         </Link>
                     </div>
                     <div className="mt-8 grid grid-cols-2 gap-3.5 sm:gap-6 lg:grid-cols-3">
@@ -355,9 +382,9 @@ export default function ProductShow({ product, related }: ProductShowProps) {
                 </section>
             )}
 
-            {/* Floating Sticky Mobile Buy Bar (< lg) */}
+            {/* Floating Sticky Mobile Buy Bar (< md) */}
             {showStickyBar && (
-                <div className="fixed inset-x-0 bottom-0 z-30 border-t border-ivory/15 bg-surface/95 px-5 py-3 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md pb-safe lg:hidden animate-in slide-in-from-bottom duration-300">
+                <div className="fixed inset-x-0 bottom-0 z-30 border-t border-ivory/15 bg-surface/95 px-5 py-3 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md pb-safe md:hidden animate-in slide-in-from-bottom duration-300">
                     <div className="flex items-center justify-between gap-4">
                         <div className="min-w-0 flex-1">
                             <p className="truncate font-display text-base font-light text-ivory">

@@ -32,7 +32,10 @@ class HomeController extends Controller
         return Inertia::render('home', [
             'featured' => ProductCardResource::collection($featured),
             'closeUp' => ProductCardResource::collection($closeUp),
-            'categories' => Category::visible()->whereNull('parent_id')->orderBy('position')->get(['slug', 'name', 'tagline']),
+            // Пустые разделы (например, после снятия мерча) не показываем.
+            'categories' => Category::visible()->whereNull('parent_id')
+                ->whereHas('products', fn ($q) => $q->live())
+                ->orderBy('position')->get(['slug', 'name', 'tagline']),
             'shipping' => [
                 'freeFromCents' => (int) config('velour.shipping.free_from_cents'),
                 'currency' => config('velour.currency'),

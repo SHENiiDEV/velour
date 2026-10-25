@@ -19,7 +19,9 @@ export default function AgeGate({ exitUrl }: AgeGateProps) {
 
     return (
         <>
-            <Head title="18+" />
+            <Head title="Adults only (18+)">
+                <meta head-key="description" name="description" content="VELOUR is a discreet shop for adults. Please confirm you are 18 or older to continue." />
+            </Head>
             <main className="relative flex min-h-svh items-center justify-center overflow-hidden bg-void px-6">
                 <div className="film-grain" aria-hidden />
                 <div className="vignette" aria-hidden />
@@ -41,7 +43,7 @@ export default function AgeGate({ exitUrl }: AgeGateProps) {
                             disabled={form.processing}
                             className="btn-gold w-full max-w-xs px-8 py-4 font-sans text-sm font-normal"
                         >
-                            Yes, I am 18
+                            Yes, I am 18 or older
                         </button>
                         <button
                             type="button"

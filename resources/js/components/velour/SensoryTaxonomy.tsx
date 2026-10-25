@@ -4,11 +4,12 @@ import { useReveal } from '@/lib/reveal';
 import { usePrivacy } from '@/lib/velour';
 
 const MATERIALS: Array<{ key: MaterialKey; name: string; line: string; note: string }> = [
-    { key: 'latex', name: 'Latex', line: 'Airtight, wet to look at, warmer than it has any right to be.', note: '0.4 mm sheet, chlorinated finish' },
-    { key: 'silicone', name: 'Silicone', line: 'Soft, matte, at your temperature within a minute.', note: 'Medical grade, platinum-cure' },
-    { key: 'glass', name: 'Glass', line: 'Holds the cold longer than you expect it to.', note: 'Borosilicate, non-porous' },
-    { key: 'steel', name: 'Steel', line: 'Weight you notice in the palm before anywhere else.', note: '316L, polished by hand' },
-    { key: 'oil', name: 'Oil', line: 'Slow, warm, and gone by morning.', note: 'Soy wax and jojoba' },
+    // Абстрактные «ощущения», а не перечень ассортимента (аудит, В7): шейдеры те же.
+    { key: 'latex', name: 'Sheen', line: 'Wet to look at, warmer than it has any right to be.', note: 'A study in light on a surface' },
+    { key: 'silicone', name: 'Velvet', line: 'Soft, matte, at your temperature within a minute.', note: 'The feel most of our pieces share' },
+    { key: 'glass', name: 'Cool', line: 'The first second of touch, before warmth arrives.', note: 'A study in temperature' },
+    { key: 'steel', name: 'Weight', line: 'Something you notice in the palm before anywhere else.', note: 'A study in mass' },
+    { key: 'oil', name: 'Warmth', line: 'Slow, close, and gone by morning.', note: 'A study in time' },
 ];
 
 /**
@@ -30,7 +31,7 @@ export default function SensoryTaxonomy() {
 
             <div className="relative grid min-h-[86svh] gap-12 px-[6vw] py-32 lg:grid-cols-[1fr_auto] lg:items-end">
                 <div className="max-w-xl">
-                    <p className="font-sans text-sm font-light text-gold/90">Five materials, one surface</p>
+                    <p className="font-sans text-sm font-light text-gold/90">Five sensations, one surface</p>
                     <h2 id="materials" className="mt-4 font-display text-6xl font-light leading-[0.95] text-ivory md:text-7xl">
                         Touch,
                         <br />

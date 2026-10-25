@@ -202,6 +202,7 @@
                 <div class="doc-meta" style="margin-top: 6px;">
                     Seller: {{ $company['name'] }}
                     @if($company['reg_number'])<br>Reg. No. {{ $company['reg_number'] }}@endif
+                    @if(!empty($company['vat_number']))<br>VAT No. {{ $company['vat_number'] }}@endif
                     @if($company['address'])<br>{{ $company['address'] }}@endif
                     <br>{{ $company['email'] }}
                 </div>

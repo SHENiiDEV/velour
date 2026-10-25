@@ -1,3 +1,4 @@
+import { route } from '@/lib/route';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Link } from '@inertiajs/react';
 

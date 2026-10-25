@@ -65,6 +65,8 @@ export interface FilterDefinition {
     type: 'scale' | 'enum' | 'bool';
     scale: { min: number; max: number; labels: Record<string, string> } | null;
     options: Array<{ value: string; label: string }> | null;
+    /** Сколько товаров с каждым значением — показываем только варианты, где есть товары. */
+    counts: Record<string, number>;
 }
 
 export interface CartItemProps {

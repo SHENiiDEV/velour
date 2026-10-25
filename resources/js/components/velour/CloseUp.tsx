@@ -34,8 +34,8 @@ export default function CloseUp({ products }: CloseUpProps) {
             </div>
 
             <p className="mt-8 max-w-md font-sans text-base font-light leading-relaxed text-mute">
-                Latex, glass, steel and the things they are shaped into. No euphemisms in the listings — the material,
-                the measurements and the care instructions are all on the page.
+                Soft-touch shells, quiet motors and the details that matter. No euphemisms in the listings — what it does,
+                how it charges and how to care for it.
             </p>
 
             <div className="mt-16 grid gap-6 md:grid-cols-3">

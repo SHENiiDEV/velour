@@ -1,5 +1,5 @@
 import { Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Filters from '@/components/velour/Filters';
 import ProductCard from '@/components/velour/ProductCard';
 import VelourLayout from '@/layouts/velour-layout';
@@ -23,33 +23,47 @@ export default function CatalogIndex({ category, categories, filters, active, pr
     const baseUrl = category ? `/catalog/${category.slug}` : '/catalog';
     const currentSort = typeof active.sort === 'string' ? active.sort : '';
     const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+    const [search, setSearch] = useState(typeof active.q === 'string' ? active.q : '');
+    const inStockOnly = active.available === '1' || active.available === 'true';
+    const hasFilters = filters.length > 0;
 
-    const setSort = (value: string) => {
-        router.get(
-            baseUrl,
-            { ...active, sort: value || undefined },
-            { preserveState: true, preserveScroll: true, replace: true, only: ['products', 'active'] }
-        );
+    const visit = (next: Record<string, string | string[] | undefined>) => {
+        router.get(baseUrl, next, { preserveState: true, preserveScroll: true, replace: true, only: ['products', 'active', 'filters'] });
     };
+
+    const setSort = (value: string) => visit({ ...active, sort: value || undefined });
+    const toggleInStock = () => visit({ ...active, available: inStockOnly ? undefined : '1' });
+
+    // Поиск по названию — сервер уже умел (?q=), не было поля (М13).
+    useEffect(() => {
+        const current = typeof active.q === 'string' ? active.q : '';
+        if (search.trim() === current) return;
+        const t = window.setTimeout(() => visit({ ...active, q: search.trim() || undefined }), 350);
+        return () => window.clearTimeout(t);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [search]);
 
     // Calculate active filter count
     const activeFilterCount = Object.entries(active).reduce((acc, [k, v]) => {
-        if (k === 'sort' || k === 'q' || v === undefined) return acc;
+        if (k === 'sort' || k === 'q' || k === 'available' || v === undefined) return acc;
         if (Array.isArray(v)) return acc + v.length;
         if (typeof v === 'string' && v.length > 0) return acc + 1;
         return acc;
     }, 0);
 
     return (
-        <VelourLayout title={`${category?.name ?? 'Collection'} — VELOUR`}>
+        <VelourLayout
+            title={category?.name ?? 'Collection'}
+            description={category?.description ?? 'The full VELOUR collection — discreet delivery in an unmarked box.'}
+        >
             {/* Header Section */}
             <section className="px-[5vw] pb-8 pt-32 sm:px-[6vw] sm:pb-12 sm:pt-40">
                 <div className="max-w-4xl">
-                    <p className="font-sans text-xs font-light tracking-[0.25em] text-gold-2 uppercase">
-                        {category?.tagline ?? 'Curated Selection'}
+                    <p className="font-display text-xl font-light italic text-gold-2">
+                        {category?.tagline ?? 'The full collection'}
                     </p>
                     <h1 className="mt-2 font-display text-4xl font-light text-ivory sm:text-6xl md:text-7xl">
-                        {category?.name ?? 'Complete Archive'}
+                        {category?.name ?? 'Collection'}
                     </h1>
                     {category?.description && (
                         <p className="mt-4 max-w-xl font-sans text-sm font-light leading-relaxed text-mute sm:text-base">
@@ -73,7 +87,7 @@ export default function CatalogIndex({ category, categories, filters, active, pr
                             }`}
                             aria-current={!category ? 'page' : undefined}
                         >
-                            All Objects
+                            All
                         </Link>
                         {categories.map((c) => {
                             const isCurrent = category?.slug === c.slug;
@@ -99,7 +113,9 @@ export default function CatalogIndex({ category, categories, filters, active, pr
             <div className="hairline mx-[5vw] sm:mx-[6vw]" />
 
             {/* Mobile Filter & Sort Bar (< lg) */}
-            <div className="sticky top-16 z-20 flex items-center justify-between border-b border-ivory/10 bg-void/90 px-[5vw] py-3.5 backdrop-blur-md lg:hidden">
+            <div className="sticky top-16 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-ivory/10 bg-void/90 px-[5vw] py-3.5 backdrop-blur-md lg:hidden">
+                <SearchField value={search} onChange={setSearch} className="w-full" />
+                {hasFilters ? (
                 <button
                     type="button"
                     onClick={() => setMobileFilterOpen(true)}
@@ -115,6 +131,9 @@ export default function CatalogIndex({ category, categories, filters, active, pr
                         </span>
                     )}
                 </button>
+                ) : (
+                    <InStockToggle on={inStockOnly} onToggle={toggleInStock} />
+                )}
 
                 {/* Sort Dropdown for Mobile */}
                 <div className="flex items-center gap-2">
@@ -136,6 +155,7 @@ export default function CatalogIndex({ category, categories, filters, active, pr
             <section className="grid gap-12 px-[5vw] py-8 sm:px-[6vw] sm:py-16 lg:grid-cols-[280px_1fr] lg:gap-16">
                 {/* Desktop Sidebar Filters */}
                 <div className="hidden lg:sticky lg:top-32 lg:block lg:self-start space-y-8">
+                    <SearchField value={search} onChange={setSearch} className="w-full" />
                     <div>
                         <p className="font-sans text-xs font-medium tracking-wider text-mute uppercase">Order By</p>
                         <div className="mt-3 flex flex-col gap-1.5">
@@ -157,8 +177,14 @@ export default function CatalogIndex({ category, categories, filters, active, pr
                     </div>
 
                     <div className="border-t border-ivory/10 pt-6">
-                        <Filters filters={filters} active={active} baseUrl={baseUrl} />
+                        <InStockToggle on={inStockOnly} onToggle={toggleInStock} />
                     </div>
+
+                    {hasFilters && (
+                        <div className="border-t border-ivory/10 pt-6">
+                            <Filters filters={filters} active={active} baseUrl={baseUrl} />
+                        </div>
+                    )}
                 </div>
 
                 {/* Product Grid */}
@@ -166,16 +192,16 @@ export default function CatalogIndex({ category, categories, filters, active, pr
                     {products.data.length === 0 ? (
                         <div className="py-16 text-center max-w-md mx-auto">
                             <p className="font-display text-3xl font-light leading-snug text-ivory/80">
-                                No objects match your criteria.
+                                Nothing matches yet.
                             </p>
-                            <p className="mt-3 font-sans text-sm font-light text-mute">
-                                Try resetting filters to explore our complete collection.
+                            <p className="mt-3 font-sans text-sm text-mute">
+                                Try another word or clear the filters to see the whole collection.
                             </p>
                             <Link
                                 href={baseUrl}
                                 className="btn-gold mt-8 inline-block px-8 py-3.5 font-sans text-xs"
                             >
-                                Reset All Filters
+                                Clear filters
                             </Link>
                         </div>
                     ) : (
@@ -237,12 +263,10 @@ export default function CatalogIndex({ category, categories, filters, active, pr
                         </div>
 
                         <div className="py-6">
-                            <Filters
-                                filters={filters}
-                                active={active}
-                                baseUrl={baseUrl}
-                                onApply={() => setMobileFilterOpen(false)}
-                            />
+                            <div className="mb-6">
+                                <InStockToggle on={inStockOnly} onToggle={toggleInStock} />
+                            </div>
+                            <Filters filters={filters} active={active} baseUrl={baseUrl} />
                         </div>
 
                         <div className="mt-4 border-t border-ivory/10 pt-4">
@@ -251,12 +275,44 @@ export default function CatalogIndex({ category, categories, filters, active, pr
                                 onClick={() => setMobileFilterOpen(false)}
                                 className="btn-gold block w-full py-4 text-center font-sans text-sm font-medium"
                             >
-                                View Results ({products.total ?? products.data.length})
+                                Show {products.meta?.total ?? products.total ?? products.data.length} results
                             </button>
                         </div>
                     </div>
                 </div>
             )}
         </VelourLayout>
+    );
+}
+
+function SearchField({ value, onChange, className = '' }: { value: string; onChange: (v: string) => void; className?: string }) {
+    return (
+        <label className={`relative block ${className}`}>
+            <span className="sr-only">Search the collection</span>
+            <input
+                type="search"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder="Search by name"
+                className="w-full rounded-full border border-ivory/15 bg-surface/50 px-4 py-2 font-sans text-sm text-ivory placeholder:text-mute/80 outline-none transition-colors focus:border-gold"
+            />
+        </label>
+    );
+}
+
+function InStockToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+    return (
+        <button
+            type="button"
+            role="switch"
+            aria-checked={on}
+            onClick={onToggle}
+            className="inline-flex items-center gap-3 font-sans text-sm text-mute transition-colors hover:text-ivory"
+        >
+            <span className={`relative h-4 w-7 rounded-full border transition-colors ${on ? 'border-gold bg-gold/20' : 'border-mute/60'}`}>
+                <span className={`absolute top-0.5 h-[10px] w-[10px] rounded-full transition-all ${on ? 'left-[15px] bg-gold' : 'left-0.5 bg-mute'}`} />
+            </span>
+            In stock only
+        </button>
     );
 }

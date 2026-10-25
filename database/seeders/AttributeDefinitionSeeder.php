@@ -47,7 +47,8 @@ class AttributeDefinitionSeeder extends Seeder
             ],
             [
                 'key' => 'noise',
-                'label' => 'Quiet',
+                // Шкала шумности: 1 точка = тихо. Подпись «Quiet» читалась наоборот (М12).
+                'label' => 'Noise level',
                 'type' => AttributeType::Scale,
                 'scale' => ['min' => 1, 'max' => 5, 'labels' => [
                     '1' => 'silent', '2' => 'barely audible', '3' => 'audible up close', '4' => 'heard in the room', '5' => 'noticeable',

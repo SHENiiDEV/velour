@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
+import { money } from '@/lib/money';
 import VelourLayout from '@/layouts/velour-layout';
 
 interface Essay {
@@ -17,7 +18,6 @@ interface Essay {
         name: string;
         tagline: string;
         slug: string;
-        price: string;
     };
 }
 
@@ -41,7 +41,6 @@ const ESSAYS: Essay[] = [
             name: 'ERICA PLUS',
             tagline: 'Wearable sculpted stimulation with whispering resonance',
             slug: 'wearable-clitoral-vibrator-erica-plus',
-            price: '€87.95',
         },
     },
     {
@@ -63,7 +62,6 @@ const ESSAYS: Essay[] = [
             name: 'BRACELETA',
             tagline: 'Sculpted jewel aesthetics with dual temperature response',
             slug: 'necklace-vibrator-braceleta',
-            price: '€60.95',
         },
     },
     {
@@ -85,7 +83,6 @@ const ESSAYS: Essay[] = [
             name: 'EMMA NEO 2',
             tagline: 'Deep rumbling interactive wand massager',
             slug: 'emma-neo-2-interactive-wand-vibrator-massager',
-            price: '€119.00',
         },
     },
     {
@@ -103,20 +100,55 @@ const ESSAYS: Essay[] = [
             'In this space, time loses its rigidity. The scent of cedar and smoky vanilla lingers in the sheets. There is nothing to accomplish, no milestone to reach — only the continuous unfolding of sensory pleasure.',
         ],
         sensoryKeys: ['Soy & Jojoba', 'Body Heat', 'Frictionless', 'Complete Surrender'],
-        pairedProduct: {
-            name: 'THE CLEAN STUFF',
-            tagline: 'Purifying botanical care and sensual maintenance',
-            slug: 'toy-cleaner',
-            price: '€19.95',
-        },
     },
 ];
 
 const CATEGORIES = ['All', 'Touch & Friction', 'Temperature & Metal', 'Darkness & Surrender', 'Rhythm & Sound'] as const;
 
-export default function Journal() {
+interface PairedLive {
+    slug: string;
+    name: string;
+    priceFromCents: number;
+    currency: string;
+}
+
+interface JournalProps {
+    /** Открытое эссе — из адреса /journal/<slug>, чтобы им можно было поделиться (В5). */
+    essay?: string | null;
+    /** Актуальные данные «парных» товаров из каталога: цена и наличие — не хардкод. */
+    paired?: Record<string, PairedLive>;
+}
+
+export default function Journal({ essay: essaySlug = null, paired = {} }: JournalProps) {
     const [activeCategory, setActiveCategory] = useState<(typeof CATEGORIES)[number]>('All');
-    const [selectedEssay, setSelectedEssay] = useState<Essay | null>(null);
+    const selectedEssay = ESSAYS.find((e) => e.id === essaySlug) ?? null;
+    const openerRef = useRef<HTMLElement | null>(null);
+
+    const openEssay = (essay: Essay, opener: HTMLElement) => {
+        openerRef.current = opener;
+        router.visit(`/journal/${essay.id}`, { preserveScroll: true, preserveState: true, only: ['essay'] });
+    };
+
+    const closeEssay = () => {
+        router.visit('/journal', { preserveScroll: true, preserveState: true, only: ['essay'] });
+    };
+
+    // Esc закрывает эссе; фокус возвращается на кнопку, которая его открыла.
+    useEffect(() => {
+        if (!selectedEssay) {
+            openerRef.current?.focus();
+            return;
+        }
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeEssay();
+            }
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [selectedEssay]);
+
     const [audioActive, setAudioActive] = useState(false);
     const audioCtxRef = useRef<AudioContext | null>(null);
     const oscGainRef = useRef<GainNode | null>(null);
@@ -195,7 +227,10 @@ export default function Journal() {
     }, []);
 
     return (
-        <VelourLayout title="Journal — The Architecture of Sensation — VELOUR">
+        <VelourLayout
+            title={selectedEssay ? `${selectedEssay.title} — Journal` : 'Journal'}
+            description={selectedEssay ? selectedEssay.subtitle : 'Essays on touch, temperature and rhythm from VELOUR.'}
+        >
             {/* Ambient background glow */}
             <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden opacity-40">
                 <div className="absolute -left-[20vw] top-[10vh] h-[70vw] w-[70vw] rounded-full bg-radial from-wine/30 via-wine/5 to-transparent blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
@@ -301,22 +336,27 @@ export default function Journal() {
 
                             {/* Actions & Paired Object */}
                             <div className="mt-10 pt-6 border-t border-ivory/10 flex flex-wrap items-center justify-between gap-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setSelectedEssay(essay)}
-                                    className="btn-gold px-8 py-3 font-sans text-xs tracking-wider uppercase"
+                                <a
+                                    href={`/journal/${essay.id}`}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        openEssay(essay, e.currentTarget);
+                                    }}
+                                    className="btn-gold px-8 py-3 font-sans text-xs tracking-wider"
                                 >
-                                    Read Full Essay
-                                </button>
+                                    Read the essay
+                                </a>
 
-                                {essay.pairedProduct && (
+                                {essay.pairedProduct && paired[essay.pairedProduct.slug] && (
                                     <Link
                                         href={`/p/${essay.pairedProduct.slug}`}
                                         className="thread flex items-center gap-2 font-sans text-xs font-light text-mute hover:text-ivory"
                                     >
-                                        <span>Paired Object:</span>
-                                        <span className="font-display text-base text-gold-2">{essay.pairedProduct.name}</span>
-                                        <span className="text-ivory/40">({essay.pairedProduct.price})</span>
+                                        <span>Paired with</span>
+                                        <span className="font-display text-base text-gold-2">{paired[essay.pairedProduct.slug].name}</span>
+                                        <span className="text-ivory/60">
+                                            {money(paired[essay.pairedProduct.slug].priceFromCents, paired[essay.pairedProduct.slug].currency)}
+                                        </span>
                                     </Link>
                                 )}
                             </div>
@@ -347,7 +387,8 @@ export default function Journal() {
                     className="fixed inset-0 z-50 flex items-center justify-center bg-void/90 p-4 backdrop-blur-xl transition-all duration-500"
                     role="dialog"
                     aria-modal="true"
-                    onClick={() => setSelectedEssay(null)}
+                    aria-labelledby="essay-title"
+                    onClick={closeEssay}
                 >
                     <div
                         className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto border border-ivory/15 bg-graphite p-8 md:p-14 shadow-2xl"
@@ -356,7 +397,8 @@ export default function Journal() {
                         {/* Close button */}
                         <button
                             type="button"
-                            onClick={() => setSelectedEssay(null)}
+                            onClick={closeEssay}
+                            autoFocus
                             className="absolute right-6 top-6 text-2xl font-light text-ivory/60 transition-colors hover:text-ivory"
                             aria-label="Close essay"
                         >
@@ -367,7 +409,7 @@ export default function Journal() {
                             {selectedEssay.category} · {selectedEssay.readTime}
                         </div>
 
-                        <h2 className="mt-4 font-display text-4xl font-light text-ivory md:text-6xl">
+                        <h2 id="essay-title" className="mt-4 font-display text-4xl font-light text-ivory md:text-6xl">
                             {selectedEssay.title}
                         </h2>
 
@@ -389,21 +431,21 @@ export default function Journal() {
                             ))}
                         </div>
 
-                        {selectedEssay.pairedProduct && (
+                        {selectedEssay.pairedProduct && paired[selectedEssay.pairedProduct.slug] && (
                             <div className="mt-12 rounded-sm border border-ivory/10 bg-surface p-6">
                                 <p className="font-sans text-xs font-light tracking-widest text-mute uppercase">
-                                    Curated Physical Pair
+                                    Paired with
                                 </p>
                                 <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
                                     <div>
-                                        <h3 className="font-display text-2xl font-light text-ivory">{selectedEssay.pairedProduct.name}</h3>
+                                        <h3 className="font-display text-2xl font-light text-ivory">{paired[selectedEssay.pairedProduct.slug].name}</h3>
                                         <p className="font-sans text-xs font-light text-mute">{selectedEssay.pairedProduct.tagline}</p>
                                     </div>
                                     <Link
                                         href={`/p/${selectedEssay.pairedProduct.slug}`}
                                         className="btn-gold px-6 py-3 font-sans text-xs font-normal uppercase"
                                     >
-                                        Explore Object ({selectedEssay.pairedProduct.price})
+                                        View · {money(paired[selectedEssay.pairedProduct.slug].priceFromCents, paired[selectedEssay.pairedProduct.slug].currency)}
                                     </Link>
                                 </div>
                             </div>

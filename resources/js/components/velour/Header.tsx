@@ -11,18 +11,20 @@ const mainNav = [
     { href: '/care', label: 'Care' },
 ];
 
-const categories = [
-    { slug: 'objects', name: 'Objects', num: '01' },
-    { slug: 'intimacy', name: 'Intimacy', num: '02' },
-    { slug: 'sensations', name: 'Sensations', num: '03' },
-    { slug: 'silk', name: 'Silk', num: '04' },
-    { slug: 'rituals', name: 'Rituals', num: '05' },
+// Запасной список, если сервер не прислал разделы (страницы ошибок).
+const fallbackCategories = [
+    { slug: 'objects', name: 'Objects' },
+    { slug: 'silk', name: 'Silk' },
+    { slug: 'rituals', name: 'Rituals' },
+    { slug: 'sensations', name: 'Sensations' },
+    { slug: 'intimacy', name: 'Intimacy' },
 ];
 
 export default function Header() {
     const { discreet } = usePrivacy();
     const shared = useShared();
     const cartCount = typeof shared.cartCount === 'number' ? shared.cartCount : 0;
+    const categories = shared.navCategories?.length ? shared.navCategories : fallbackCategories;
     const page = usePage();
     const url = page?.url || '';
     const [open, setOpen] = useState(false);
@@ -92,15 +94,20 @@ export default function Header() {
                         <Link
                             href="/cart"
                             className="group relative flex items-center gap-2 rounded-full border border-ivory/10 bg-surface/40 px-3.5 py-1.5 font-sans text-xs font-light text-ivory/90 backdrop-blur-sm transition-all hover:border-gold/40 hover:text-ivory sm:px-4 sm:py-2"
-                            aria-label={`Cart, ${cartCount} items`}
+                            aria-label={`Bag, ${cartCount} items`}
                         >
-                            <span className="font-sans text-xs tracking-wider">Cart</span>
+                            <span className="font-sans text-xs tracking-wider">Bag</span>
                             {cartCount > 0 && (
                                 <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 font-display text-xs font-semibold text-void">
                                     {cartCount}
                                 </span>
                             )}
                         </Link>
+
+                        {/* Быстрый выход на телефоне — всегда на виду, одно касание */}
+                        <div className="md:hidden">
+                            <QuickExit compact />
+                        </div>
 
                         {/* Mobile Hamburger Toggle Button */}
                         <button
@@ -174,9 +181,6 @@ export default function Header() {
                                         <span className="font-display text-lg text-ivory transition-colors group-hover:text-gold-2">
                                             {c.name}
                                         </span>
-                                        <span className="font-sans text-[10px] font-light text-gold-2">
-                                            {c.num}
-                                        </span>
                                     </Link>
                                 ))}
                             </div>
@@ -184,14 +188,20 @@ export default function Header() {
 
                         {/* Legal & Manifesto Links */}
                         <div className="border-t border-ivory/10 pt-4 flex flex-wrap gap-x-5 gap-y-2 font-sans text-xs font-light text-mute">
+                            <Link href="/delivery" className="hover:text-ivory transition-colors">
+                                Delivery
+                            </Link>
+                            <Link href="/returns" className="hover:text-ivory transition-colors">
+                                Returns
+                            </Link>
                             <Link href="/privacy" className="hover:text-ivory transition-colors">
-                                Privacy Manifesto
+                                Privacy
                             </Link>
                             <Link href="/terms" className="hover:text-ivory transition-colors">
                                 Terms
                             </Link>
-                            <Link href="/care" className="hover:text-ivory transition-colors">
-                                Materials
+                            <Link href="/legal-notice" className="hover:text-ivory transition-colors">
+                                Contact
                             </Link>
                         </div>
                     </div>

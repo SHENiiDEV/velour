@@ -27,7 +27,7 @@ interface HomeProps {
 const pillars = [
     {
         title: 'Material',
-        text: 'Latex, medical-grade silicone, borosilicate glass, polished steel. We name every material outright — and stock only what is body-safe.',
+        text: 'We list exactly what the manufacturer states about every piece — and when something is not on the page, we answer plainly if you ask.',
     },
     {
         title: 'Quiet',
@@ -49,12 +49,15 @@ export default function Home({ featured, closeUp, categories, shipping, statemen
     const pillarsRef = useReveal<HTMLElement>();
 
     return (
-        <VelourLayout title="VELOUR — dark luxury for adults">
+        <VelourLayout
+            title="VELOUR — dark luxury for adults"
+            description="A discreet shop for adults: vibrators, strokers and app-connected pieces, shipped in an unmarked box with a neutral sender name."
+        >
             {/* I. Кино */}
             <CinematicHero
                 eyebrow="VELOUR · first collection"
                 lines={['Quieter.', 'Closer.']}
-                lede="Glass, latex and polished steel, made for adults who read the label. Everything shipped in a box that says nothing."
+                lede="Vibrators, strokers and app-connected pieces for adults who read the label. Everything shipped in a box that says nothing."
                 discreet={discreet}
                 object={<ObjectStage className="h-full w-full" discreet={discreet} shape="plug" />}
             >
