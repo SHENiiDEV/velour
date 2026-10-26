@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Http\Controllers\DiscreetModeController;
 use App\Models\Category;
+use App\Support\Shipping;
 use App\Services\CartService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -36,14 +37,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'company' => config('velour.company'),
             // Условия доставки и пометка НДС — одна точка правды для карточки, корзины и страницы Delivery.
-            'shop' => [
-                'currency' => config('velour.currency'),
-                'shippingFlatCents' => (int) config('velour.shipping.flat_cents'),
-                'freeShippingFromCents' => (int) config('velour.shipping.free_from_cents'),
-                'vatNote' => config('velour.vat_note'),
-                'dispatchDays' => config('velour.shipping.dispatch_days'),
-                'countries' => config('velour.shipping.countries'),
-            ],
+            'shop' => Shipping::shared(),
             'flash' => [
                 'status' => fn () => $request->session()->get('status'),
             ],

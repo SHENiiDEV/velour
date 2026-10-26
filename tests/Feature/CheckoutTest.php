@@ -161,3 +161,14 @@ it('rejects obviously wrong address data with readable messages', function () {
     expect(session('errors')->first('shipping_address.country'))->toBe('We do not deliver to this country yet.');
     expect(Order::count())->toBe(0);
 });
+
+it('accepts UK addresses and keeps unlisted countries out', function () {
+    [, $uk] = placeOrder($this, [
+        'shipping_address' => ['name' => 'Guest', 'line1' => '1 High Street', 'city' => 'London', 'postcode' => 'SW1A 1AA', 'country' => 'GB'],
+    ]);
+    $uk->assertSessionHasNoErrors();
+
+    expect(App\Support\Shipping::countries())->toHaveKey('GB')->not->toHaveKey('US')
+        ->and(App\Support\Shipping::countries()['GB']['window'])->toBe('7–10 days')
+        ->and(App\Support\Shipping::countries()['LV']['region'])->toBe('eu');
+});

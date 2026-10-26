@@ -23,6 +23,7 @@ const POSTCODE_HINTS: Record<string, string> = {
     FR: '75001',
     NL: '1012 AB',
     SE: '111 22',
+    GB: 'SW1A 1AA',
 };
 
 export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
@@ -37,7 +38,7 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
             line2: '',
             city: '',
             postcode: '',
-            country: countries[0]?.[0] ?? 'LV',
+            country: shop.countries.LV ? 'LV' : (countries[0]?.[0] ?? 'LV'),
         },
         notes: '',
         discreet_packaging: privacy.discreetPackagingDefault,
@@ -196,7 +197,9 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                                                 ))}
                                             </select>
                                             <span className="mt-1 block font-sans text-xs text-mute">
-                                                {shop.countries[form.data.shipping_address.country]?.transit} after dispatch ·{' '}
+                                                {shop.countries[form.data.shipping_address.country]?.window
+                                                    ? `Usually ${shop.countries[form.data.shipping_address.country]?.window} after dispatch · `
+                                                    : ''}
                                                 <Link href="/delivery" target="_blank" className="underline underline-offset-4 hover:text-ivory">
                                                     Delivery
                                                 </Link>

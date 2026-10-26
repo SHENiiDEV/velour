@@ -62,19 +62,77 @@ return [
         // Срок отправки со склада (рабочие дни) — показывается на странице Delivery.
         'dispatch_days' => env('VELOUR_DISPATCH_DAYS', '1–2'),
         /*
-        | Страны доставки: ISO-код => [название, срок в пути]. Только они доступны
-        | в оформлении заказа (В9). Меняется здесь — меняется везде.
+        | Регионы доставки: срок в пути и стоимость. Срок показывается на странице
+        | Delivery (таблица) и в оформлении заказа для выбранной страны.
+        | fee: standard — {flat_cents}, бесплатно от {free_from_cents};
+        |      checkout — считается при оформлении; quote — согласуется отдельно.
         */
-        'countries' => [
-            'LV' => ['name' => 'Latvia', 'transit' => '1–2 business days'],
-            'LT' => ['name' => 'Lithuania', 'transit' => '2–3 business days'],
-            'EE' => ['name' => 'Estonia', 'transit' => '2–3 business days'],
-            'FI' => ['name' => 'Finland', 'transit' => '3–5 business days'],
-            'PL' => ['name' => 'Poland', 'transit' => '3–5 business days'],
-            'DE' => ['name' => 'Germany', 'transit' => '3–5 business days'],
-            'FR' => ['name' => 'France', 'transit' => '4–6 business days'],
-            'NL' => ['name' => 'Netherlands', 'transit' => '3–5 business days'],
-            'SE' => ['name' => 'Sweden', 'transit' => '3–5 business days'],
+        'regions' => [
+            'uk' => [
+                'name' => 'United Kingdom',
+                'window' => '7–10 days',
+                'details' => 'Most orders are expected to arrive within approximately 7 to 10 days after dispatch.',
+                'fee' => 'standard',
+            ],
+            'eu' => [
+                'name' => 'European Union',
+                'window' => '15–25 days',
+                'details' => 'Deliveries commonly take around 15 to 25 days, depending on the destination, carrier route and customs handling.',
+                'fee' => 'standard',
+            ],
+            'worldwide' => [
+                'name' => 'Worldwide',
+                'window' => '25–30 days',
+                'details' => 'Orders outside the UK and EU generally arrive within approximately 25 to 30 days, subject to customs clearance and local carrier operations.',
+                'fee' => 'checkout',
+            ],
+            'oversized' => [
+                'name' => 'Oversized or specialist delivery',
+                'window' => null,
+                'details' => 'An estimated timeframe is confirmed separately where additional freight or delivery coordination is required.',
+                'fee' => 'quote',
+            ],
+        ],
+
+        /*
+        | Страны, доступные в оформлении заказа (В9), по регионам. Добавить страну —
+        | одна строка; срок подтянется из региона. Страны «worldwide» добавляй
+        | только после решения по таможне и налогам на импорт.
+        */
+        'countries_by_region' => [
+            'uk' => [
+                'GB' => 'United Kingdom',
+            ],
+            'eu' => [
+            'AT' => 'Austria',
+            'BE' => 'Belgium',
+            'BG' => 'Bulgaria',
+            'HR' => 'Croatia',
+            'CY' => 'Cyprus',
+            'CZ' => 'Czechia',
+            'DK' => 'Denmark',
+            'EE' => 'Estonia',
+            'FI' => 'Finland',
+            'FR' => 'France',
+            'DE' => 'Germany',
+            'GR' => 'Greece',
+            'HU' => 'Hungary',
+            'IE' => 'Ireland',
+            'IT' => 'Italy',
+            'LV' => 'Latvia',
+            'LT' => 'Lithuania',
+            'LU' => 'Luxembourg',
+            'MT' => 'Malta',
+            'NL' => 'Netherlands',
+            'PL' => 'Poland',
+            'PT' => 'Portugal',
+            'RO' => 'Romania',
+            'SK' => 'Slovakia',
+            'SI' => 'Slovenia',
+            'ES' => 'Spain',
+            'SE' => 'Sweden',
+            ],
+            'worldwide' => [],
         ],
     ],
 

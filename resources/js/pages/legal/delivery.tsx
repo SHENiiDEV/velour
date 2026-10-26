@@ -3,16 +3,28 @@ import LegalPage from '@/components/velour/LegalPage';
 import { useCompany } from '@/hooks/use-company';
 import { money } from '@/lib/money';
 import { useShop } from '@/lib/velour';
+import type { ShippingRegion } from '@/types/velour';
 
 export default function Delivery() {
     const shop = useShop();
     const company = useCompany();
-    const countries = Object.entries(shop.countries);
+    const regions = Object.entries(shop.regions);
+    const countriesIn = (region: string) =>
+        Object.values(shop.countries)
+            .filter((c) => c.region === region)
+            .map((c) => c.name);
+
+    const fee = (r: ShippingRegion) =>
+        r.fee === 'standard'
+            ? `${money(shop.shippingFlatCents, shop.currency)} per order, free from ${money(shop.freeShippingFromCents, shop.currency)}.`
+            : r.fee === 'checkout'
+              ? 'Calculated at checkout based on the destination and order details.'
+              : 'Calculated according to the product, access requirements and destination.';
 
     return (
         <LegalPage
             title="Delivery"
-            updated="25 October 2026"
+            updated="26 October 2026"
             lede={
                 <p>
                     Every order leaves in a plain box with a neutral sender name. Delivery is free from{' '}
@@ -22,27 +34,71 @@ export default function Delivery() {
             sections={[
                 {
                     id: 'where',
-                    title: 'Where we deliver',
+                    title: 'Delivery times by region',
                     body: (
                         <>
-                            <p>We currently deliver to the countries below. Times are estimates after dispatch.</p>
-                            <table>
+                            {/* Таблица от sm; на телефоне — карточки, чтобы три колонки не сжимались в нечитаемое. */}
+                            <table className="hidden sm:table">
                                 <thead>
                                     <tr>
-                                        <th>Country</th>
-                                        <th>Time in transit</th>
+                                        <th className="w-[24%]">Delivery region</th>
+                                        <th>Expected arrival*</th>
+                                        <th className="w-[30%]">Shipping fee</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {countries.map(([code, c]) => (
-                                        <tr key={code}>
-                                            <td>{c.name}</td>
-                                            <td>{c.transit}</td>
+                                    {regions.map(([key, r]) => (
+                                        <tr key={key}>
+                                            <td>{r.name}</td>
+                                            <td>
+                                                {r.window && <strong className="block">{r.window}</strong>}
+                                                {r.details}
+                                            </td>
+                                            <td>{fee(r)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
-                            <p>If your country is not listed, write to us — we are adding destinations.</p>
+
+                            <dl className="space-y-6 sm:hidden">
+                                {regions.map(([key, r]) => (
+                                    <div key={key} className="border-b border-ivory/10 pb-5">
+                                        <dt className="font-display text-2xl text-ivory">
+                                            {r.name}
+                                            {r.window && <span className="ml-2 font-sans text-base text-gold-2">{r.window}</span>}
+                                        </dt>
+                                        <dd className="mt-2">{r.details}</dd>
+                                        <dd className="mt-2 text-mute">{fee(r)}</dd>
+                                    </div>
+                                ))}
+                            </dl>
+
+                            <p className="text-sm text-mute">
+                                * Estimates counted from dispatch. We dispatch within {shop.dispatchDays} business days of your order.
+                            </p>
+                        </>
+                    ),
+                },
+                {
+                    id: 'countries',
+                    title: 'Where we deliver',
+                    body: (
+                        <>
+                            {regions
+                                .filter(([key]) => key !== 'oversized')
+                                .map(([key, r]) => {
+                                    const list = countriesIn(key);
+                                    return (
+                                        <p key={key}>
+                                            <strong>{r.name}:</strong>{' '}
+                                            {list.length > 0 ? list.join(', ') + '.' : (
+                                                <>
+                                                    on request — write to <a href={`mailto:${company.email}`}>{company.email}</a> with your country.
+                                                </>
+                                            )}
+                                        </p>
+                                    );
+                                })}
                         </>
                     ),
                 },
@@ -52,10 +108,11 @@ export default function Delivery() {
                     body: (
                         <ul>
                             <li>
-                                {money(shop.shippingFlatCents, shop.currency)} per order, free from {money(shop.freeShippingFromCents, shop.currency)}.
+                                UK and EU: {money(shop.shippingFlatCents, shop.currency)} per order, free from{' '}
+                                {money(shop.freeShippingFromCents, shop.currency)}.
                             </li>
-                            <li>The delivery cost is shown in your bag and at checkout before you place the order.</li>
-                            <li>All prices on the site are final prices{shop.vatNote ? ` (${shop.vatNote})` : ''}. There are no customs duties within the EU.</li>
+                            <li>The delivery cost is always shown in your bag and at checkout before you place the order.</li>
+                            <li>All product prices on the site are final prices{shop.vatNote ? ` (${shop.vatNote})` : ''}.</li>
                         </ul>
                     ),
                 },

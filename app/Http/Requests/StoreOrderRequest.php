@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Support\Shipping;
 use Illuminate\Validation\Rule;
 
 class StoreOrderRequest extends FormRequest
@@ -18,6 +19,7 @@ class StoreOrderRequest extends FormRequest
         'FR' => '/^\d{5}$/',
         'NL' => '/^\d{4}\s?[A-Z]{2}$/i',
         'SE' => '/^\d{3}\s?\d{2}$/',
+        'GB' => '/^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$/i',
     ];
 
     public function rules(): array
@@ -37,7 +39,7 @@ class StoreOrderRequest extends FormRequest
                 'regex:'.(self::POSTCODES[$country] ?? '/^[A-Za-z0-9 \-]{3,10}$/'),
             ],
             // Только страны, куда есть доставка (config/velour.php → shipping.countries).
-            'shipping_address.country' => ['required', 'string', Rule::in(array_keys(config('velour.shipping.countries', [])))],
+            'shipping_address.country' => ['required', 'string', Rule::in(array_keys(Shipping::countries()))],
 
             'notes' => ['nullable', 'string', 'max:500'],
 
@@ -81,7 +83,7 @@ class StoreOrderRequest extends FormRequest
         $country = strtoupper((string) $this->input('shipping_address.country'));
         $hint = [
             'LV' => 'LV-1010', 'LT' => 'LT-01100', 'EE' => '10111', 'FI' => '00100', 'PL' => '00-001',
-            'DE' => '10115', 'FR' => '75001', 'NL' => '1012 AB', 'SE' => '111 22',
+            'DE' => '10115', 'FR' => '75001', 'NL' => '1012 AB', 'SE' => '111 22', 'GB' => 'SW1A 1AA',
         ][$country] ?? null;
 
         return [

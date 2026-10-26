@@ -49,14 +49,7 @@ return Application::configure(basePath: dirname(__DIR__))
                         ],
                         'flash' => ['status' => null],
                         'cartCount' => 0,
-                        'shop' => [
-                            'currency' => config('velour.currency'),
-                            'shippingFlatCents' => (int) config('velour.shipping.flat_cents'),
-                            'freeShippingFromCents' => (int) config('velour.shipping.free_from_cents'),
-                            'vatNote' => config('velour.vat_note'),
-                            'dispatchDays' => config('velour.shipping.dispatch_days'),
-                            'countries' => config('velour.shipping.countries'),
-                        ],
+                        'shop' => \App\Support\Shipping::shared(),
                     ] : [];
 
                     return Inertia::render('error', [

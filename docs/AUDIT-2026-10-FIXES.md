@@ -37,7 +37,7 @@ VELOUR_CSP=true                  # CSP в production; при проблемах 
 VELOUR_CSP_EXTRA=""              # домены платёжного провайдера, когда подключите
 ```
 
-Страны доставки и сроки — `config/velour.php → shipping.countries` (сейчас LV, LT, EE, FI, PL, DE, FR, NL, SE; GB и US убраны из-за таможни).
+Доставка по регионам — `config/velour.php → shipping.regions` (UK 7–10 дней, EU 15–25, Worldwide 25–30, негабарит — отдельно) и `shipping.countries_by_region` (сейчас GB + все 27 стран ЕС; Worldwide — пусто, по запросу).
 
 ## nginx: сжатие статики (В13)
 

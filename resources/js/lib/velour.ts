@@ -43,6 +43,7 @@ const SHOP_FALLBACK: ShopProps = {
     freeShippingFromCents: 9000,
     vatNote: 'incl. VAT',
     dispatchDays: '1–2',
+    regions: {},
     countries: {},
 };
 
