@@ -25,6 +25,7 @@ class Order extends Model
             'total_cents' => 'integer',
             'placed_at' => 'datetime',
             'paid_at' => 'datetime',
+            'cancelled_at' => 'datetime',
         ];
     }
 
