@@ -3,6 +3,7 @@ import Field from '@/components/velour/Field';
 import Veil from '@/components/velour/Veil';
 import VelourLayout from '@/layouts/velour-layout';
 import { useShop, variantLabel } from '@/lib/velour';
+import { merchantName, useCompany } from '@/hooks/use-company';
 import CartSummary from '@/components/velour/CartSummary';
 import { money } from '@/lib/money';
 import type { CartProps } from '@/types/catalog';
@@ -28,6 +29,7 @@ const POSTCODE_HINTS: Record<string, string> = {
 
 export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
     const shop = useShop();
+    const company = useCompany();
     const countries = Object.entries(shop.countries);
     const form = useForm({
         email: '',
@@ -72,7 +74,8 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                             Discreet Checkout
                         </h1>
                         <p className="mt-3 max-w-xl font-sans text-xs font-light leading-relaxed text-mute sm:text-sm">
-                            Every order is packaged without branding or descriptions, dispatched discreetly, and billed under an innocuous name.
+                            Every order is packaged without branding or descriptions and dispatched discreetly. Your statement shows only{' '}
+                            {privacy.statementDescriptor} — never product names.
                         </p>
                     </div>
 
@@ -316,7 +319,8 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                                     <div className="h-6 w-9 rounded-[3px] bg-gradient-to-tr from-gold to-gold-2 opacity-90 shadow-sm" />
                                 </div>
                                 <p className="mt-3 font-sans text-xs font-light leading-relaxed text-mute">
-                                    This neutral description is exactly what appears on your credit card or bank ledger. Zero mention of products or adult categories.
+                                    This is how the charge appears on your card or bank statement — the shop name only, with no product names or
+                                    categories.
                                 </p>
                             </div>
 
@@ -358,6 +362,11 @@ export default function CheckoutIndex({ cart, privacy }: CheckoutProps) {
                                 >
                                     {form.processing ? 'Securing Passage…' : 'Proceed to Secure Payment →'}
                                 </button>
+                                {/* Мерчант — юридическое название и страна (требование эквайера TPF). */}
+                                <p className="text-center font-sans text-xs leading-relaxed text-mute">
+                                    Merchant: <span className="text-ivory/90">{merchantName(company)}</span>
+                                    {company.country ? `, ${company.country}` : ''}
+                                </p>
                                 <div className="flex items-center justify-center gap-2 text-center font-sans text-xs font-light text-mute">
                                     <span>🔒 256-Bit SSL Encrypted</span>
                                     <span>•</span>

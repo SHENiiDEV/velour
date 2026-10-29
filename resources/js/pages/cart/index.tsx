@@ -146,10 +146,10 @@ export default function CartIndex({ cart }: CartIndexProps) {
                                         </div>
                                         <div className="space-y-1">
                                             <p className="font-sans text-xs font-medium text-gold-2 uppercase tracking-wider">
-                                                02. Neutral Billing
+                                                02. Discreet Billing
                                             </p>
                                             <p className="font-sans text-xs font-light leading-relaxed text-mute">
-                                                Charges appear under a generic descriptor on bank and credit statements.
+                                                Your statement shows only our shop name — never what you bought.
                                             </p>
                                         </div>
                                         <div className="space-y-1">

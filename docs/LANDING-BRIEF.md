@@ -248,8 +248,8 @@ Nothing left behind.       Discreet mode blurs every frame and renames the tab. 
 
 Make it demonstrate itself:
 
-- Render the real statement string from `config('velour.statement_descriptor')` (`VLR RETAIL`) as a
-  three-line mock bank entry — date, `VLR RETAIL`, amount — set in `font-sans`, in a `surface` frame.
+- Render the real statement string from `config('velour.statement_descriptor')` (`VELOUR`) as a
+  three-line mock bank entry — date, `VELOUR`, amount — set in `font-sans`, in a `surface` frame.
   Pass it through `HomeController` as a prop; do not hardcode it in TSX.
 - Put a live **Try discreet mode** control in this act (reuse `DiscreetToggle`), so the frames in
   Act IV visibly veil while the visitor watches. This is the single most persuasive interaction on

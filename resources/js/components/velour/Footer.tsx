@@ -17,7 +17,7 @@ export default function Footer() {
                         VELOUR
                     </p>
                     <p className="max-w-md leading-relaxed text-mute">
-                        Atelier of Sensations &amp; Quiet Luxury. Every piece is dispatched in an unmarked, tamper-evident container with zero advertising trackers and a neutral merchant descriptor on your financial ledger.
+                        Atelier of Sensations &amp; Quiet Luxury. Every piece is dispatched in an unmarked, tamper-evident container with zero advertising trackers — and your statement never names what you bought.
                     </p>
                     <div className="pt-2 flex items-center gap-6">
                         <DiscreetToggle />

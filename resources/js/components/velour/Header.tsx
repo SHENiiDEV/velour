@@ -213,7 +213,7 @@ export default function Header() {
                             <QuickExit />
                         </div>
                         <p className="font-sans text-[11px] font-light leading-relaxed text-mute/80">
-                            🔒 100% Unmarked Box · Anonymous Bank Billing · Zero Trackers
+                            Unmarked box · No product names on your statement · Zero trackers
                         </p>
                     </div>
                 </div>

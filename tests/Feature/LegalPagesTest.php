@@ -16,3 +16,14 @@ it('gives every journal essay its own address', function () {
         ->get('/journal/does-not-exist')
         ->assertNotFound();
 });
+
+it('states the governing law and the merchant on the terms page', function () {
+    config(['velour.company.name' => 'CALDORIS VENTURES LTD', 'velour.company.trading_name' => 'VELOUR']);
+
+    $this->get('/terms')->assertInertia(fn ($page) => $page
+        ->component('legal/terms')
+        ->where('governingLaw', 'England and Wales')
+        ->where('company.name', 'CALDORIS VENTURES LTD')
+        ->where('company.trading_name', 'VELOUR')
+        ->where('company.country', 'United Kingdom'));
+});

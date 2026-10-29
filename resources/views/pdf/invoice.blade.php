@@ -200,10 +200,11 @@
                 <div class="doc-title">Receipt & Invoice</div>
                 <div class="doc-meta">#{{ $order->number }} · {{ $order->created_at ? $order->created_at->format('M d, Y') : date('M d, Y') }}</div>
                 <div class="doc-meta" style="margin-top: 6px;">
-                    Seller: {{ $company['name'] }}
+                    Seller: {{ $company['name'] }}@if(!empty($company['trading_name']) && strcasecmp($company['trading_name'], $company['name']) !== 0) (trading as {{ $company['trading_name'] }})@endif
                     @if($company['reg_number'])<br>Reg. No. {{ $company['reg_number'] }}@endif
                     @if(!empty($company['vat_number']))<br>VAT No. {{ $company['vat_number'] }}@endif
                     @if($company['address'])<br>{{ $company['address'] }}@endif
+                    @if(!empty($company['country']) && ! str_contains((string) $company['address'], $company['country']))<br>{{ $company['country'] }}@endif
                     <br>{{ $company['email'] }}
                 </div>
             </td>
@@ -310,7 +311,7 @@
     <div class="discretion-badge">
         <div class="discretion-title">The Discretion Covenant</div>
         <div class="discretion-text">
-            Your privacy is absolute. This shipment was dispatched in an unmarked, tamper-evident container with no external indication of contents. Billed on your financial statement as <strong>{{ $order->statement_descriptor }}</strong>.
+            Your privacy is absolute. This shipment was dispatched in an unmarked, tamper-evident container with no external indication of contents. Your bank statement shows only <strong>{{ $order->statement_descriptor }}</strong> — never product names.
         </div>
     </div>
 

@@ -31,7 +31,7 @@ const pillars = [
     },
     {
         title: 'Quiet',
-        text: 'A parcel with no logos. A neutral line on your statement. Discreet mode at a single touch.',
+        text: 'A parcel with no logos. No product names on your statement. Discreet mode at a single touch.',
     },
     {
         title: 'No judgement',

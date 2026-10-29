@@ -14,7 +14,11 @@ export interface PrivacyProps {
 
 /** Юридические реквизиты продавца (config/velour.php → company). */
 export interface CompanyProps {
+    /** Юридическое название мерчанта. */
     name: string;
+    /** Торговое название (VELOUR). */
+    trading_name: string;
+    country: string;
     address: string;
     reg_number: string;
     email: string;

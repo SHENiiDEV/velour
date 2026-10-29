@@ -1,15 +1,15 @@
 import { Link } from '@inertiajs/react';
 import LegalPage from '@/components/velour/LegalPage';
-import { useCompany } from '@/hooks/use-company';
+import { merchantName, useCompany } from '@/hooks/use-company';
 
-export default function Terms() {
+export default function Terms({ governingLaw = 'England and Wales' }: { governingLaw?: string }) {
     const company = useCompany();
     const mail = <a href={`mailto:${company.email}`}>{company.email}</a>;
 
     return (
         <LegalPage
             title="Terms of sale"
-            updated="25 October 2026"
+            updated="29 October 2026"
             lede={<p>The rules for buying from us, in plain language. Your statutory consumer rights always apply in addition.</p>}
             sections={[
                 {
@@ -17,10 +17,11 @@ export default function Terms() {
                     title: 'Who you are buying from',
                     body: (
                         <p>
-                            {company.name}
+                            {merchantName(company)}
                             {company.reg_number ? `, company number ${company.reg_number}` : ''}
-                            {company.address ? `, ${company.address}` : ''}. Contact: {mail}. Full details are on the{' '}
-                            <Link href="/legal-notice">Legal notice</Link> page.
+                            {company.address ? `, ${company.address}` : ''}
+                            {company.country && !company.address.includes(company.country) ? `, ${company.country}` : ''}. Contact: {mail}. Full
+                            details are on the <Link href="/legal-notice">Legal notice</Link> page.
                         </p>
                     ),
                 },
@@ -103,12 +104,21 @@ export default function Terms() {
                 },
                 {
                     id: 'law',
-                    title: 'Language and law',
+                    title: 'Governing law and language',
                     body: (
-                        <p>
-                            The contract is concluded in English. If you are a consumer, you keep the protection of the mandatory laws of the
-                            country where you live. Complaints: see <Link href="/legal-notice#complaints">Legal notice</Link>.
-                        </p>
+                        <>
+                            <p>
+                                These terms and any contract made under them are governed by the laws of <strong>{governingLaw}</strong>.
+                            </p>
+                            <p>
+                                If you are a consumer, this choice of law does not take away the protection you have under the mandatory
+                                consumer laws of the country where you live, and you may bring a claim in the courts of that country or in the
+                                courts of {governingLaw}.
+                            </p>
+                            <p>
+                                The contract is concluded in English. Complaints: see <Link href="/legal-notice#complaints">Legal notice</Link>.
+                            </p>
+                        </>
                     ),
                 },
             ]}

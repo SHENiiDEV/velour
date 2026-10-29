@@ -247,7 +247,7 @@
                     <div class="discretion-box">
                         <div class="discretion-title">Guaranteed Discreet Packaging</div>
                         <div class="discretion-desc">
-                            Your order will arrive in a plain, unmarked box with a neutral sender name. Bank charges will appear simply as <strong>{{ $order->statement_descriptor }}</strong>.
+                            Your order will arrive in a plain, unmarked box with a neutral sender name. Your bank statement will show only <strong>{{ $order->statement_descriptor }}</strong> — never product names.
                         </div>
                     </div>
 

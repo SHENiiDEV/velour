@@ -58,7 +58,7 @@ export default function AmbientWordmark() {
 
                 <div className="relative flex flex-col items-center gap-8 bg-void px-[6vw] pb-8 pt-12 text-center">
                     <p className="max-w-md font-sans text-base font-light leading-relaxed text-mute">
-                        Adults only. Unmarked packaging, a neutral line on your statement, and nothing else to explain.
+                        Adults only. Unmarked packaging, no product names on your statement, and nothing else to explain.
                     </p>
                     <Link href="/catalog" data-magnetic className="btn-gold px-10 py-4 font-sans text-sm font-light">
                         Enter the collection

@@ -14,11 +14,12 @@ return [
     'exit_url' => env('VELOUR_EXIT_URL', 'https://www.google.com'),
 
     /*
-    | Нейтральное имя в выписке по карте (передаётся платёжному провайдеру).
-    | Покупатель видит эту строку в банковском приложении — она не должна
-    | ничего сообщать о содержимом заказа.
+    | Billing descriptor — строка в банковской выписке покупателя. Задаётся у
+    | эквайера (TPF); здесь она только ПОКАЗЫВАЕТСЯ на сайте, в письмах и инвойсе,
+    | поэтому должна совпадать с тем, что указано в анкете провайдера.
+    | Название магазина без названий товаров и категорий.
     */
-    'statement_descriptor' => env('VELOUR_STATEMENT_DESCRIPTOR', 'VLR RETAIL'),
+    'statement_descriptor' => env('VELOUR_STATEMENT_DESCRIPTOR', 'VELOUR'),
 
     /*
     | Анонимная упаковка по умолчанию для всех заказов.
@@ -30,7 +31,12 @@ return [
     | PDF-инвойсов и писем. Задаются в .env (COMPANY_*).
     */
     'company' => [
+        // Юридическое название мерчанта (CALDORIS VENTURES LTD).
         'name' => env('COMPANY_NAME', 'VELOUR'),
+        // Торговое название: «CALDORIS VENTURES LTD (trading as VELOUR)».
+        'trading_name' => env('COMPANY_TRADING_NAME', 'VELOUR'),
+        // Страна местонахождения мерчанта — на странице оплаты и в legal notice.
+        'country' => env('COMPANY_COUNTRY', 'United Kingdom'),
         'address' => env('COMPANY_ADDRESS', ''),
         'reg_number' => env('COMPANY_REG_NUMBER', ''),
         'email' => env('COMPANY_EMAIL', env('MAIL_FROM_ADDRESS', 'info@velour-retail.com')),
@@ -40,6 +46,9 @@ return [
         // Куда отправлять возвраты. Пусто — сообщаем адрес по запросу после уведомления об отказе.
         'returns_address' => env('COMPANY_RETURNS_ADDRESS', ''),
     ],
+
+    // Применимое право в Terms of Sale (обязательные права потребителя страны проживания сохраняются).
+    'governing_law' => env('VELOUR_GOVERNING_LAW', 'England and Wales'),
 
     'security' => [
         // Content-Security-Policy в production. Дополнения (платёжный провайдер) — VELOUR_CSP_EXTRA.

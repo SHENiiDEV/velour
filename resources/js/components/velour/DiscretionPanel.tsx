@@ -29,8 +29,8 @@ export default function DiscretionPanel({ statementDescriptor }: DiscretionPanel
                         needs to know.
                     </h2>
                     <p className="mt-8 max-w-md font-sans text-base font-light leading-relaxed text-mute">
-                        A plain box with no logos and no hint of the contents. A neutral entity as the sender. One line on your
-                        statement that says nothing. And a switch that blurs every image on this site until you hover it.
+                        A plain box with no logos and no hint of the contents. A neutral entity as the sender. One short line on your
+                        statement — our name, never what you bought. And a switch that blurs every image on this site until you hover it.
                     </p>
 
                     <button
@@ -73,7 +73,7 @@ export default function DiscretionPanel({ statementDescriptor }: DiscretionPanel
                             <div>
                                 <p className="font-display text-3xl text-ivory">{statementDescriptor}</p>
                                 <p className="mt-2 font-sans text-xs font-light text-mute">
-                                    No shop name. No category. No questions at the dinner table.
+                                    No product names. No category. No questions at the dinner table.
                                 </p>
                             </div>
 

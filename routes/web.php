@@ -43,7 +43,7 @@ Route::get('/journal/{essay?}', JournalController::class)->name('journal');
 // Доступны без age-gate: юридические страницы, «Забота» и Страницы Ошибок
 Route::get('/care', fn () => Inertia::render('care'))->name('care');
 Route::get('/privacy', fn () => Inertia::render('legal/privacy'))->name('legal.privacy');
-Route::get('/terms', fn () => Inertia::render('legal/terms'))->name('legal.terms');
+Route::get('/terms', fn () => Inertia::render('legal/terms', ['governingLaw' => config('velour.governing_law')]))->name('legal.terms');
 Route::get('/delivery', fn () => Inertia::render('legal/delivery'))->name('legal.delivery');
 Route::get('/returns', fn () => Inertia::render('legal/returns'))->name('legal.returns');
 Route::get('/cookies', fn () => Inertia::render('legal/cookies'))->name('legal.cookies');

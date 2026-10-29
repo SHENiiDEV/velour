@@ -40,7 +40,7 @@
                                     <td style="padding:20px 0; border-bottom:1px solid rgba(236,227,214,0.07);">
                                         <div style="font-family:'Cormorant Garamond', Georgia, serif; font-size:21px; color:#e6cb88; font-weight:400;">Discreet, always</div>
                                         <div style="margin-top:6px; font-size:13px; line-height:1.65; color:#9e8e88;">
-                                            Plain, unmarked packaging. A neutral line on your statement — <span style="color:#ece3d6;">{{ $descriptor }}</span>. No advertising trackers following you around the internet.
+                                            Plain, unmarked packaging. Your statement shows only <span style="color:#ece3d6;">{{ $descriptor }}</span> — never what you bought. No advertising trackers following you around the internet.
                                         </div>
                                     </td>
                                 </tr>

@@ -34,7 +34,7 @@ export default function AgeGate({ exitUrl }: AgeGateProps) {
                         Are you 18 or older?
                     </h1>
                     <p className="mx-auto mt-6 max-w-sm font-sans text-base font-light leading-relaxed text-mute">
-                        Behind this door is a shop for adults. We will not ask more than we need, and we will leave nothing in your parcel or on your statement.
+                        Behind this door is a shop for adults. We will not ask more than we need, and nothing on your parcel or your statement will say what you bought.
                     </p>
 
                     <div className="mt-12 flex flex-col items-center gap-5">

@@ -282,7 +282,7 @@ export default function ProductShow({ product, related }: ProductShowProps) {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="text-gold-2">✓</span>
-                                    <span>Neutral billing descriptor on card statement</span>
+                                    <span>No product names on your card statement</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="text-gold-2">✓</span>

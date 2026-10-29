@@ -19,6 +19,18 @@ export default function LegalNotice() {
                                     <th>Seller</th>
                                     <td>{company.name}</td>
                                 </tr>
+                                {company.trading_name && company.trading_name !== company.name && (
+                                    <tr>
+                                        <th>Trading as</th>
+                                        <td>{company.trading_name}</td>
+                                    </tr>
+                                )}
+                                {company.country && (
+                                    <tr>
+                                        <th>Country</th>
+                                        <td>{company.country}</td>
+                                    </tr>
+                                )}
                                 {company.reg_number && (
                                     <tr>
                                         <th>Company number</th>
