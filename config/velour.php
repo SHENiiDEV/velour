@@ -47,6 +47,49 @@ return [
         'returns_address' => env('COMPANY_RETURNS_ADDRESS', ''),
     ],
 
+    /*
+    | Подборки (edits) — страницы /edit/<slug> в навигации. Та же витрина каталога
+    | с предустановленным отбором; признаки берутся из текста карточек (FeatureDetector).
+    | Ключи отбора: sort, max_price_cents, kinds, exclude_kinds, any_features,
+    | published_within_days. nav — короткое имя для шапки.
+    */
+    'edits' => [
+        'new-in' => [
+            'title' => 'New in',
+            'tagline' => 'Just arrived',
+            'lede' => 'The latest pieces in the collection, newest first.',
+            'sort' => 'new',
+        ],
+        'first-time' => [
+            'title' => 'First time',
+            'tagline' => 'A gentle place to start',
+            'lede' => 'Simple, approachable pieces under €100 — easy to use, easy to clean, nothing to prove.',
+            'max_price_cents' => 10000,
+            'kinds' => ['vibrator', 'wand', 'egg', 'suction', 'rabbit', 'wearable'],
+            'sort' => 'price-asc',
+            'notes' => [
+                ['title' => 'Start softer than you think', 'text' => 'Begin on the lowest setting and work up. Smaller and gentler is almost always the better first choice.'],
+                ['title' => 'Water-based lubricant', 'text' => 'It suits every material we sell, silicone included, and rinses away without a trace.'],
+                ['title' => 'Clean before the first use', 'text' => 'Warm water and mild soap, then let it dry completely. The Care page has the details for each material.'],
+            ],
+        ],
+        'for-two' => [
+            'title' => 'For two',
+            'nav' => 'For two',
+            'tagline' => 'Shared curiosity',
+            'lede' => 'Pieces made to be shared — for couples, or with app control you can hand over across the room or across the world.',
+            'any_features' => ['couples', 'app_control'],
+        ],
+        'gifts' => [
+            'title' => 'Gifts under €100',
+            'nav' => 'Gifts',
+            'tagline' => 'Something they will not expect',
+            'lede' => 'Thoughtful pieces under €100, sent in a plain box with a neutral sender name — the surprise stays inside.',
+            'max_price_cents' => 10000,
+            'exclude_kinds' => ['accessory'],
+        ],
+    ],
+
     // Применимое право в Terms of Sale (обязательные права потребителя страны проживания сохраняются).
     'governing_law' => env('VELOUR_GOVERNING_LAW', 'England and Wales'),
 

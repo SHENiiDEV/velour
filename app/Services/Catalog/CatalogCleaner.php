@@ -21,7 +21,8 @@ use App\Support\HtmlSanitizer;
  *   «Buy … Online Shop», блоки FAQ — вырезаются; мерч производителя снимается с витрины.
  * - К6: услуга гравировки снимается с витрины, пока нет поля для текста.
  * - К2: все фото по умолчанию НЕ безопасны для скрытного режима (размываются).
- * - В2: выдуманные «сенсорные» характеристики удаляются — реальных данных нет.
+ * - В2: выдуманные «сенсорные» характеристики удаляются; вместо них — признаки для фильтров,
+ *   которые прямо названы в тексте карточки (тип, app control, waterproof…), см. FeatureDetector.
  * - В4: шаблонные подзаголовки/истории/уход удаляются, подзаголовок режется по словам.
  */
 class CatalogCleaner
@@ -87,6 +88,9 @@ class CatalogCleaner
             Category::where('slug', $slug)->update($copy);
         }
 
+        // Словарь признаков для фильтров (тип, app control, waterproof…).
+        FeatureDetector::ensureDefinitions();
+
         // Шкала шумности: 1 точка = тихо, «Quiet» читалось наоборот (М12).
         AttributeDefinition::where('key', 'noise')->where('label', 'Quiet')->update(['label' => 'Noise level']);
 
@@ -137,8 +141,8 @@ class CatalogCleaner
             'materials' => $nonBody ? [] : $this->materials($haystack),
             // Значок «Body-safe» — только вручную, при наличии документов производителя.
             'is_body_safe' => false,
-            // Выдуманные характеристики убираем — фильтры и шкалы показываются, только когда есть данные.
-            'attributes' => [],
+            // Только то, что написано в карточке (FeatureDetector); выдуманных шкал больше нет.
+            'attributes' => app(FeatureDetector::class)->detect($name, $text),
         ]);
 
         if ($unpublish) {

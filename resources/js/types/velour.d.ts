@@ -57,6 +57,8 @@ export interface SharedProps {
     company: CompanyProps;
     shop: ShopProps;
     navCategories?: Array<{ slug: string; name: string }>;
+    /** Подборки /edit/<slug> для шапки. */
+    navEdits?: Array<{ slug: string; title: string; nav: string }>;
     flash: { status: string | null };
     cartCount: number;
     [key: string]: unknown;

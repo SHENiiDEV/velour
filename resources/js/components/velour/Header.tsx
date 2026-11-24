@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import DiscreetToggle from './DiscreetToggle';
 import QuickExit from './QuickExit';
 import Wordmark from './Wordmark';
@@ -9,6 +9,14 @@ const mainNav = [
     { href: '/catalog', label: 'Collection' },
     { href: '/journal', label: 'Journal' },
     { href: '/care', label: 'Care' },
+];
+
+// Запасной список подборок (страницы ошибок без shared props).
+const fallbackEdits = [
+    { slug: 'new-in', title: 'New in', nav: 'New in' },
+    { slug: 'first-time', title: 'First time', nav: 'First time' },
+    { slug: 'for-two', title: 'For two', nav: 'For two' },
+    { slug: 'gifts', title: 'Gifts under €100', nav: 'Gifts' },
 ];
 
 // Запасной список, если сервер не прислал разделы (страницы ошибок).
@@ -25,6 +33,10 @@ export default function Header() {
     const shared = useShared();
     const cartCount = typeof shared.cartCount === 'number' ? shared.cartCount : 0;
     const categories = shared.navCategories?.length ? shared.navCategories : fallbackCategories;
+    const edits = shared.navEdits?.length ? shared.navEdits : fallbackEdits;
+    const [shopOpen, setShopOpen] = useState(false);
+    const shopRef = useRef<HTMLDivElement | null>(null);
+    const closeTimer = useRef<number | undefined>(undefined);
     const page = usePage();
     const url = page?.url || '';
     const [open, setOpen] = useState(false);
@@ -37,11 +49,41 @@ export default function Header() {
         return () => window.removeEventListener('scroll', onScroll);
     }, []);
 
-    // Закрываем шторку при смене страницы и разблокируем скролл
+    // Закрываем шторку и меню «Shop» при смене страницы и разблокируем скролл
     useEffect(() => {
         setOpen(false);
+        setShopOpen(false);
         document.body.style.overflow = '';
     }, [url]);
+
+    // Меню «Shop»: Esc и клик мимо закрывают. Esc здесь не считается для Quick exit (data-esc-capture).
+    useEffect(() => {
+        if (!shopOpen) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                setShopOpen(false);
+            }
+        };
+        const onClick = (e: MouseEvent) => {
+            if (shopRef.current && !shopRef.current.contains(e.target as Node)) setShopOpen(false);
+        };
+        window.addEventListener('keydown', onKey);
+        document.addEventListener('mousedown', onClick);
+        return () => {
+            window.removeEventListener('keydown', onKey);
+            document.removeEventListener('mousedown', onClick);
+        };
+    }, [shopOpen]);
+
+    const openShop = () => {
+        window.clearTimeout(closeTimer.current);
+        setShopOpen(true);
+    };
+    const closeShopSoon = () => {
+        window.clearTimeout(closeTimer.current);
+        closeTimer.current = window.setTimeout(() => setShopOpen(false), 180);
+    };
 
     // Блокируем скролл body при открытом мобильном меню
     const toggleMenu = () => {
@@ -70,17 +112,114 @@ export default function Header() {
                     </div>
 
                     {/* Desktop Navigation */}
-                    <nav className="hidden items-center gap-10 md:flex" aria-label="Main menu">
-                        {mainNav.map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className="thread font-sans text-sm font-light text-ivory/80 transition-colors hover:text-ivory"
-                                aria-current={isActive(item.href) ? 'page' : undefined}
+                    <nav className="hidden items-center gap-7 md:flex lg:gap-9" aria-label="Main menu">
+                        {/* Shop: все разделы и подборки в одной панели */}
+                        <div
+                            ref={shopRef}
+                            className="relative"
+                            onPointerEnter={(e) => e.pointerType === 'mouse' && openShop()}
+                            onPointerLeave={(e) => e.pointerType === 'mouse' && closeShopSoon()}
+                            data-esc-capture={shopOpen ? '' : undefined}
+                        >
+                            <button
+                                type="button"
+                                onClick={() => setShopOpen((v) => !v)}
+                                aria-expanded={shopOpen}
+                                aria-controls="shop-menu"
+                                className={`thread inline-flex items-center gap-1.5 font-sans text-sm font-light transition-colors hover:text-ivory ${
+                                    isActive('/catalog') || isActive('/edit') ? 'text-ivory' : 'text-ivory/80'
+                                }`}
                             >
-                                {item.label}
+                                Shop
+                                <svg className={`h-3 w-3 transition-transform ${shopOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" aria-hidden>
+                                    <path d="M2.5 4.5 6 8l3.5-3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </button>
+
+                            {shopOpen && (
+                                <div
+                                    id="shop-menu"
+                                    className="absolute left-1/2 top-full z-50 mt-5 w-[min(640px,80vw)] -translate-x-1/2 rounded-sm border border-ivory/10 bg-surface/95 p-8 shadow-[0_30px_80px_rgba(0,0,0,0.55)] backdrop-blur-xl"
+                                >
+                                    <div className="grid grid-cols-2 gap-10">
+                                        <div>
+                                            <p className="font-display text-lg italic text-gold-2">Collections</p>
+                                            <ul className="mt-4 space-y-2.5">
+                                                <li>
+                                                    <Link href="/catalog" className="font-display text-2xl font-light text-ivory transition-colors hover:text-gold-2">
+                                                        Everything
+                                                    </Link>
+                                                </li>
+                                                {categories.map((c) => (
+                                                    <li key={c.slug}>
+                                                        <Link
+                                                            href={`/catalog/${c.slug}`}
+                                                            className="font-display text-2xl font-light text-ivory/85 transition-colors hover:text-gold-2"
+                                                        >
+                                                            {c.name}
+                                                        </Link>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <p className="font-display text-lg italic text-gold-2">Edits</p>
+                                            <ul className="mt-4 space-y-2.5">
+                                                {edits.map((e) => (
+                                                    <li key={e.slug}>
+                                                        <Link
+                                                            href={`/edit/${e.slug}`}
+                                                            className="font-display text-2xl font-light text-ivory/85 transition-colors hover:text-gold-2"
+                                                        >
+                                                            {e.title}
+                                                        </Link>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-ivory/10 pt-5 font-sans text-xs text-mute">
+                                        <Link href="/care" className="hover:text-ivory">
+                                            Materials &amp; care
+                                        </Link>
+                                        <Link href="/delivery" className="hover:text-ivory">
+                                            Delivery
+                                        </Link>
+                                        <Link href="/returns" className="hover:text-ivory">
+                                            Returns
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Подборки — на широких экранах прямо в шапке */}
+                        {/* Ширина: две первых — от 1280px, остальные — от 1536px; все всегда есть в «Shop». */}
+                        {edits.map((e, i) => (
+                            <Link
+                                key={e.slug}
+                                href={`/edit/${e.slug}`}
+                                className={`thread hidden font-sans text-sm font-light text-ivory/80 transition-colors hover:text-ivory ${
+                                    i < 2 ? 'xl:inline' : '2xl:inline'
+                                }`}
+                                aria-current={isActive(`/edit/${e.slug}`) ? 'page' : undefined}
+                            >
+                                {e.nav}
                             </Link>
                         ))}
+
+                        {mainNav
+                            .filter((item) => item.href !== '/catalog')
+                            .map((item) => (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className="thread font-sans text-sm font-light text-ivory/80 transition-colors hover:text-ivory"
+                                    aria-current={isActive(item.href) ? 'page' : undefined}
+                                >
+                                    {item.label}
+                                </Link>
+                            ))}
                     </nav>
 
                     {/* Right Actions */}
@@ -181,6 +320,22 @@ export default function Header() {
                                         <span className="font-display text-lg text-ivory transition-colors group-hover:text-gold-2">
                                             {c.name}
                                         </span>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Подборки */}
+                        <div className="border-t border-ivory/10 pt-6">
+                            <span className="font-display text-lg italic text-gold-2">Edits</span>
+                            <div className="mt-3 grid grid-cols-2 gap-3">
+                                {edits.map((e) => (
+                                    <Link
+                                        key={e.slug}
+                                        href={`/edit/${e.slug}`}
+                                        className="group flex items-center justify-between rounded-sm border border-ivory/10 bg-void/40 p-3 transition-all hover:border-gold/30 hover:bg-void/70"
+                                    >
+                                        <span className="font-display text-lg text-ivory transition-colors group-hover:text-gold-2">{e.nav}</span>
                                     </Link>
                                 ))}
                             </div>

@@ -46,6 +46,8 @@ class HandleInertiaRequests extends Middleware
                 ->whereHas('products', fn ($q) => $q->live())
                 ->orderBy('position')
                 ->get(['slug', 'name']),
+            // Подборки для шапки (/edit/<slug>).
+            'navEdits' => fn () => \App\Http\Controllers\CatalogController::editLinks(),
             // Счётчик для шапки. Замыкание — считается только когда фронт его просит.
             'cartCount' => fn () => app(CartService::class)->current()?->itemCount() ?? 0,
         ];

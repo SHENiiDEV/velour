@@ -84,5 +84,8 @@ class AttributeDefinitionSeeder extends Seeder
         foreach ($definitions as $definition) {
             AttributeDefinition::updateOrCreate(['key' => $definition['key']], $definition);
         }
+
+        // Признаки для фильтров каталога (тип, app control, waterproof…) — из текста карточек.
+        \App\Services\Catalog\FeatureDetector::ensureDefinitions();
     }
 }

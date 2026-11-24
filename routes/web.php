@@ -23,6 +23,7 @@ Route::post('/discreet', [DiscreetModeController::class, 'toggle'])->name('discr
 // Каталог
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/catalog/{category:slug}', [CatalogController::class, 'index'])->name('catalog.category');
+Route::get('/edit/{slug}', [CatalogController::class, 'edit'])->where('slug', '[a-z0-9-]+')->name('catalog.edit');
 Route::get('/p/{product:slug}', [CatalogController::class, 'show'])->name('product.show');
 
 // Корзина

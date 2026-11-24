@@ -300,7 +300,7 @@ export default function ProductShow({ product, related }: ProductShowProps) {
                         {product.sensory.length > 0 && (
                             <div className="mt-10 border-t border-ivory/10 pt-6" style={{ '--i': 7 } as React.CSSProperties}>
                                 <p className="font-sans text-xs font-medium tracking-wider text-mute uppercase">
-                                    Sensory Characteristics
+                                    At a glance
                                 </p>
                                 <div className="mt-3 divide-y divide-ivory/10">
                                     {product.sensory.map((s) => (

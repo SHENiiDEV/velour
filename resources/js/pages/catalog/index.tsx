@@ -5,9 +5,22 @@ import ProductCard from '@/components/velour/ProductCard';
 import VelourLayout from '@/layouts/velour-layout';
 import type { FilterDefinition, Paginated, ProductCard as ProductCardProps } from '@/types/catalog';
 
+interface EditProps {
+    slug: string;
+    title: string;
+    tagline: string | null;
+    lede: string | null;
+    notes: Array<{ title: string; text: string }>;
+    /** Сортировка подборки по умолчанию. */
+    sort: string;
+}
+
 interface CatalogProps {
     category: { slug: string; name: string; tagline: string | null; description: string | null } | null;
+    /** Подборка /edit/<slug> — та же витрина со своим вступлением. */
+    edit?: EditProps | null;
     categories: Array<{ slug: string; name: string; tagline: string | null }>;
+    edits?: Array<{ slug: string; title: string; nav: string }>;
     filters: FilterDefinition[];
     active: Record<string, string | string[] | undefined>;
     products: Paginated<ProductCardProps>;
@@ -15,13 +28,20 @@ interface CatalogProps {
 
 const sorts = [
     { value: '', label: 'Featured' },
+    { value: 'new', label: 'Newest' },
     { value: 'price-asc', label: 'Price: Low to High' },
     { value: 'price-desc', label: 'Price: High to Low' },
 ];
 
-export default function CatalogIndex({ category, categories, filters, active, products }: CatalogProps) {
-    const baseUrl = category ? `/catalog/${category.slug}` : '/catalog';
-    const currentSort = typeof active.sort === 'string' ? active.sort : '';
+export default function CatalogIndex({ category, edit = null, categories, edits = [], filters, active, products }: CatalogProps) {
+    const baseUrl = edit ? `/edit/${edit.slug}` : category ? `/catalog/${category.slug}` : '/catalog';
+    const pillClass = (on: boolean) =>
+        `shrink-0 rounded-full border px-4 py-2 font-sans text-xs transition-all ${
+            on
+                ? 'border-gold bg-gold/15 text-gold-2 font-medium shadow-[0_0_15px_rgba(198,161,91,0.15)]'
+                : 'border-ivory/15 bg-surface/30 text-mute hover:border-ivory/40 hover:text-ivory'
+        }`;
+    const currentSort = typeof active.sort === 'string' ? active.sort : (edit?.sort ?? '');
     const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
     const [search, setSearch] = useState(typeof active.q === 'string' ? active.q : '');
     const inStockOnly = active.available === '1' || active.available === 'true';
@@ -53,24 +73,36 @@ export default function CatalogIndex({ category, categories, filters, active, pr
 
     return (
         <VelourLayout
-            title={category?.name ?? 'Collection'}
-            description={category?.description ?? 'The full VELOUR collection — discreet delivery in an unmarked box.'}
+            title={edit?.title ?? category?.name ?? 'Collection'}
+            description={edit?.lede ?? category?.description ?? 'The full VELOUR collection — discreet delivery in an unmarked box.'}
         >
             {/* Header Section */}
             <section className="px-[5vw] pb-8 pt-32 sm:px-[6vw] sm:pb-12 sm:pt-40">
                 <div className="max-w-4xl">
                     <p className="font-display text-xl font-light italic text-gold-2">
-                        {category?.tagline ?? 'The full collection'}
+                        {edit?.tagline ?? category?.tagline ?? 'The full collection'}
                     </p>
                     <h1 className="mt-2 font-display text-4xl font-light text-ivory sm:text-6xl md:text-7xl">
-                        {category?.name ?? 'Collection'}
+                        {edit?.title ?? category?.name ?? 'Collection'}
                     </h1>
-                    {category?.description && (
-                        <p className="mt-4 max-w-xl font-sans text-sm font-light leading-relaxed text-mute sm:text-base">
-                            {category.description}
+                    {(edit?.lede ?? category?.description) && (
+                        <p className="mt-4 max-w-xl font-sans text-sm leading-relaxed text-mute sm:text-base">
+                            {edit?.lede ?? category?.description}
                         </p>
                     )}
                 </div>
+
+                {/* Подсказки подборки (First time) — коротко и по делу, без поучений */}
+                {edit && edit.notes.length > 0 && (
+                    <dl className="mt-10 grid max-w-5xl gap-6 sm:grid-cols-3 sm:gap-10">
+                        {edit.notes.map((n) => (
+                            <div key={n.title} className="border-t border-gold/30 pt-4">
+                                <dt className="font-display text-2xl font-light text-ivory">{n.title}</dt>
+                                <dd className="mt-2 font-sans text-sm leading-relaxed text-mute">{n.text}</dd>
+                            </div>
+                        ))}
+                    </dl>
+                )}
 
                 {/* Horizontal Category Carousel Navigation (Smooth Scroll on Mobile) */}
                 <div className="mt-8 -mx-[5vw] px-[5vw] sm:mx-0 sm:px-0">
@@ -78,31 +110,23 @@ export default function CatalogIndex({ category, categories, filters, active, pr
                         className="flex items-center gap-2 overflow-x-auto no-scrollbar py-2 sm:flex-wrap sm:gap-3"
                         aria-label="Categories"
                     >
-                        <Link
-                            href="/catalog"
-                            className={`shrink-0 rounded-full border px-4 py-2 font-sans text-xs transition-all ${
-                                !category
-                                    ? 'border-gold bg-gold/15 text-gold-2 font-medium shadow-[0_0_15px_rgba(198,161,91,0.15)]'
-                                    : 'border-ivory/15 bg-surface/30 text-mute hover:border-ivory/40 hover:text-ivory'
-                            }`}
-                            aria-current={!category ? 'page' : undefined}
-                        >
+                        <Link href="/catalog" className={pillClass(!category && !edit)} aria-current={!category && !edit ? 'page' : undefined}>
                             All
                         </Link>
                         {categories.map((c) => {
                             const isCurrent = category?.slug === c.slug;
                             return (
-                                <Link
-                                    key={c.slug}
-                                    href={`/catalog/${c.slug}`}
-                                    className={`shrink-0 rounded-full border px-4 py-2 font-sans text-xs transition-all ${
-                                        isCurrent
-                                            ? 'border-gold bg-gold/15 text-gold-2 font-medium shadow-[0_0_15px_rgba(198,161,91,0.15)]'
-                                            : 'border-ivory/15 bg-surface/30 text-mute hover:border-ivory/40 hover:text-ivory'
-                                    }`}
-                                    aria-current={isCurrent ? 'page' : undefined}
-                                >
+                                <Link key={c.slug} href={`/catalog/${c.slug}`} className={pillClass(isCurrent)} aria-current={isCurrent ? 'page' : undefined}>
                                     {c.name}
+                                </Link>
+                            );
+                        })}
+                        {edits.length > 0 && <span className="mx-1 h-5 w-px shrink-0 bg-ivory/15" aria-hidden />}
+                        {edits.map((e) => {
+                            const isCurrent = edit?.slug === e.slug;
+                            return (
+                                <Link key={e.slug} href={`/edit/${e.slug}`} className={pillClass(isCurrent)} aria-current={isCurrent ? 'page' : undefined}>
+                                    {e.nav}
                                 </Link>
                             );
                         })}
